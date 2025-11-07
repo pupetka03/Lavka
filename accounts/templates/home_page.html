@@ -83,8 +83,8 @@
             outline: none;
             font-size: 19px;
             resize: none;
-            min-height: 100px;
-            padding: 10px 0;
+            min-height: 50px;
+            padding: 15px 0;
             box-sizing: border-box;
         }
         
@@ -267,6 +267,7 @@
                 {% csrf_token %}
                 <input type="text" style = "padding = 5px; margin = 5px;" name="title" placeholder="Názov" class="post-textarea" style="font-weight: bold;"><br>
                 <textarea name="text" class="post-textarea" placeholder="Co sa deje?"></textarea><br>
+                <input type="text" name="tags" class="post-textarea" placeholder="Tagy (oddeli medzerou alebo cez ,)"><br>
                 <button type="submit" class="post-button">Publikovat</button>
             </form>
             <div style="clear: both;"></div>
@@ -278,7 +279,18 @@
 
 <div>
     <div class="post-author"> {{pub.title}} <span class="post-handle">@{{pub.user.username}}</span></div>
-    <div class="post-text">{{pub.text}}.</div>
+
+    <div class="post-text">
+        <a href="{% url 'pub' pub.slug %}" style="text-decoration:none; color:inherit; cursor:pointer;">
+            {{ pub.text }}
+        </a>
+    </div>
+    <div class="post-tags">
+        {% for tag in pub.tags.all %}
+            <span class="tag">#{{ tag }}</span>
+        {% endfor %}
+    </div>
+
     <div class="post-stats">
 
         <a href="{% url 'create_comments' pub.slug %}" style="text-decoration:none; color:inherit; cursor:pointer;">
@@ -289,23 +301,25 @@
         <span class="like-button" data-slug="{{ pub.slug }}" style="cursor:pointer;">
             ❤️ <span class="like-count">{{ pub.likes.count }}</span>
         </span>
-
     </div>
 </div>
 
                 {%for comment in pub.comments.all|slice:":3"%}
+                {% if comment.parent %}
+                    
+                {% else %}
                 <div class="comment-section-wrapper">
                     <div class="comment-item">
                         <div class="comment-author"> {{comment.user}} <span class="post-handle">@{{comment.user}}</span></div>
                         <div class="comment-text">{{comment.text}}</div>
                     </div>
                 </div>
+                 {%endif%}
                 {%endfor%}
             </div>
             {%endfor%}
 
         </div>
-
         
 
         <div class="sidebar-right">

@@ -1,0 +1,15 @@
+{% if comment.replies.all %}
+<div class="replies-wrapper">
+    {% for reply in comment.replies.all %}
+        <div class="reply-item">
+            <div class="reply-author">
+                {{ reply.user }} <span class="post-handle">@{{ reply.user.username }} > to @{{ comment.user }}</span>
+            </div>
+            <div class="reply-text">{{ reply.text }}</div>
+
+            {# Рекурсивно підключаємо _replies для реплайя #}
+            {% include "_replies.html" with comment=reply %}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}

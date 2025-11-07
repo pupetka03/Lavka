@@ -1,5 +1,5 @@
-from django.shortcuts import render, redirect
-from .models import User, Publication, Like, Comments
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import User, Publication, Like, Comments, Tag
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -81,13 +81,23 @@ def create_publication(request):
     if request.user.is_authenticated:
 
         if request.method == "POST":
+            tags_all = Tag.objects.all()
+
             title = request.POST.get("title")
             text = request.POST.get("text")
 
+            tags = request.POST.get("tags")
+
+      
             if title and text and len(title.strip()) > 3 and len(text.strip()) > 3:
-                Publication.objects.create(user=request.user, title=title, text=text)
-            else:
-                ...
+                pub = Publication.objects.create(user=request.user, title=title, text=text)
+
+                for tag in tags.split():
+                    obj, created = Tag.objects.get_or_create(name=tag.lower())
+                    obj.usage_count += 1
+                    obj.save()
+                    pub.tags.add(obj)
+            
 
 
         return redirect("home_page")
@@ -103,13 +113,13 @@ def like_publication(request, slug):
     pub = Publication.objects.get(slug=slug)
     like, created = Like.objects.get_or_create(user=request.user, publication=pub)
     if not created:
-        like.delete()  # якщо вже лайкав — знімаємо лайк
+        like.delete()
     likes_count = pub.likes.count()
     return JsonResponse({"likes": likes_count})
 
 
 @login_required
-def create_comments(request, slug):
+def create_comments(request, slug, parent=None):
     if request.method == "POST":
         pub = Publication.objects.get(slug=slug)
         form = CreateCommentsForms(request.POST)
@@ -117,7 +127,13 @@ def create_comments(request, slug):
             obj = form.save(commit = False)
             obj.user = request.user
             obj.publication = pub
-            obj.save()
+            if parent:
+                par = Comments.objects.get(id=parent)
+                obj.parent = par
+                obj.save()
+            else:
+                obj.save()
+
         return redirect("home_page")
 
     else:
@@ -126,6 +142,13 @@ def create_comments(request, slug):
     return render(request, "create_c.html", {"form":form})
 
 
+
+
+
+
+def open_publication(request, slug):
+    pub = get_object_or_404(Publication, slug=slug)
+    return render(request, "pub.html", {"pub":pub})
 
 
 

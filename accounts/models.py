@@ -20,6 +20,7 @@ class Publication(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE, related_name="publications")
     title = models.CharField(max_length=15)
     text = models.CharField(max_length=100)
+    tags = models.ManyToManyField("Tag", related_name="publications")
     created_at = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(unique=True, blank=True)
 
@@ -57,13 +58,26 @@ class Like(models.Model):
 
 class Comments(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    text = models.CharField(max_length=50)
+    text = models.CharField(max_length=200)
     publication = models.ForeignKey(Publication, on_delete=models.CASCADE, related_name="comments")
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ("-created_at",)
+        ordering = ("created_at",)
 
     def __str__(self):
-        return f'{self.user}, {self.text}'
+        return f"{self.user}: {self.text}"
+    
+
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=30, unique=True)
+    usage_count = models.PositiveBigIntegerField(default=0)
+
+    def __str__(self):
+        return self.name
+
+
 
