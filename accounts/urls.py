@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from .views import page_register, page_login, home_page, create_publication, like_publication, out, create_comments, open_publication
 
 urlpatterns = [
@@ -11,5 +11,6 @@ urlpatterns = [
     path("create_c/<slug:slug>/", create_comments, name="create_comments"),
     path('create_c/<slug:slug>/<int:parent>/', create_comments, name='create_reply'),
     path('pub/<slug:slug>/', open_publication, name="pub"),
+
 
 ]

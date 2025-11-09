@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from django.utils.text import slugify
 from django.contrib.auth.models import AbstractUser
+from pytils.translit import slugify as pytils_slugify
 
 
 class User(AbstractUser):
@@ -34,11 +35,11 @@ class Publication(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             transliterated_title = slugify(self.title)
-            self.slug = f"{transliterated_title}-{uuid.uuid4()}"
+            self.slug = f"{pytils_slugify(self.title)}-{str(uuid.uuid4())[:8]}"
         super().save(*args, **kwargs)
         
     def __str__(self):
-        return f'{self.user}, {self.text}, {self.created_at}'
+        return f'{self.user}, {self.text}, {self.created_at}, {self.tags}'
 
 
 class Like(models.Model):
@@ -51,7 +52,7 @@ class Like(models.Model):
         unique_together = ('user', 'publication')
 
     def __str__(self):
-        return f'{self.user.username}, {self.created_at}'
+        return f'{self.user.username}, {self.created_at}, {self.publication}'
     
 
 

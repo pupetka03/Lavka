@@ -22,3 +22,7 @@ staticfiles/
 # IDE files
 .idea/
 .vscode/
+
+#test
+management/
+file.txt

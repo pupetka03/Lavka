@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import CreatePublicationForm, CreateCommentsForms
 from django.http import JsonResponse
+from .recsys import get_feed_for_user
 
 
 
@@ -67,7 +68,10 @@ def out(request):
 
 
 def home_page(request):
-    publication = Publication.objects.all()
+    #publication = Publication.objects.all()
+    if not request.user.is_authenticated:
+        return redirect("register")
+    publication = get_feed_for_user(request.user)
     likes = Like.objects.all()
     
 
@@ -149,7 +153,6 @@ def create_comments(request, slug, parent=None):
 def open_publication(request, slug):
     pub = get_object_or_404(Publication, slug=slug)
     return render(request, "pub.html", {"pub":pub})
-
 
 
 
