@@ -1,23 +1,25 @@
 from django.utils import timezone
 from datetime import timedelta
-from .models import Like, Publication
+from .models import Like, Publication, Tag
 from django.db.models import Count
 from django.db.models import Q
 import math
+import random
+from random import shuffle
 
 
 
 
 
 #this is recomendation systems only for publication
-
 TIME_LIMIT = timezone.now() - timedelta(days=1)
+
+
 
 def get_feed_for_user(user):
 
     # ============== збір інфи ============
 
-    # множини з авторами і тегами які юзер лайкає
     authors = set() 
     tags = set()
 
@@ -35,27 +37,25 @@ def get_feed_for_user(user):
             tags.add(tag)
 
 
-
-
-    # =============== Ранжування ===================== 
-
+    fresh_post = get_random_fresh_posts()
 
 
     #поєднує кандидатів за останнім часом
     candidates = Publication.objects.filter(
         Q(user__in=authors) |
         Q(tags__in=tags) |
-        Q(id__in=popular_posts.values('id')),
+        Q(id__in=popular_posts.values('id')) |
+        Q(id__in=[p.id for p in fresh_post]),
         created_at__gte=TIME_LIMIT
     ).distinct()
 
     candidates = list(candidates)
 
+
     # ========== Ранжування ===========
 
     # Готуємо нормалізацію
     max_likes = max((p.likes.count() for p in candidates), default=1)
-    vidlatka(authors, tags, popular_posts)
 
     def score_post(post):
         score = 0
@@ -77,40 +77,113 @@ def get_feed_for_user(user):
 
         return score
 
+
     # Рахуємо оцінки та сортуємо
     candidates = sorted(candidates, key=score_post, reverse=True)
-
+    
     # ---- Підмішування популярних (щоб фід був живим) ----
     popular_list = list(popular_posts)
+    #debug_feed(candidates, score_post)
+    
 
     if popular_list:
         mix_count = max(1, math.ceil(len(candidates) * 0.35))
         pop_to_insert = popular_list[:mix_count]
         step = max(1, len(candidates) // mix_count)
+        
 
         i = step
         for p in pop_to_insert:
-            candidates.insert(i, p)
-            i += step
-
+            if p not in candidates:
+                candidates.insert(i, p)
+                i += step
+        #vidlatka(authors, tags, popular_posts)
+    #debug_feed(candidates, score_post)
     return candidates
-
-    
 
 
 
 def get_popular_feed():
-
-    popular = (
+    qs = (
         Publication.objects
         .filter(created_at__gte=TIME_LIMIT)
-        .annotate(likes_count=Count('likes'))  # рахуємо лайки на рівні SQL
-        .order_by('-likes_count')              # сортуємо від найбільш залайканих
+        .annotate(likes_count=Count('likes'))
+        .order_by('-likes_count')
     )
 
-    return popular
+    total = qs.count()
+    keep = max(5, total // 2)
+    return qs[:keep]
 
 
+
+def get_random_fresh_posts():
+    fresh_posts = list(Publication.objects.order_by('-created_at')[:5])
+    random.shuffle(fresh_posts)
+    return fresh_posts[:3]
+
+
+
+def tegs_feed_popular():
+
+    popular_pub = get_popular_feed()
+    tags = set()
+
+    for pub in popular_pub:
+        for tag in pub.tags.all():
+            if len(tags) >= 3:
+                break
+            tags.add(tag.name)
+
+    return tags
+
+
+
+def get_random_feed_for_user(user):
+    # ======= Збір інфи ==========
+    authors = set()
+    tags = set()
+
+    user_liked_author_posts = Like.objects.filter(user=user)
+
+    for like in user_liked_author_posts:
+        authors.add(like.publication.user)
+        for tag in like.publication.tags.all():
+            tags.add(tag)
+
+
+    candidates = Publication.objects.filter(created_at__gte=TIME_LIMIT)
+    candidates = list(candidates)
+
+    
+    #======== Ранжування =========
+    max_likes = max((p.likes.count() for p in candidates), default=1)
+    def score_post(post):
+        score = 0
+
+        if post.user in authors:
+            score -= 1
+
+        if Like.objects.filter(publication=post).exists():
+            score -= 1
+
+        age_seconds = (timezone.now() - post.created_at).total_seconds()
+        freshness = max(0, 1 - age_seconds / (60 * 60 * 24))  # за добу згасає
+        score += 1 * freshness
+
+        score += 0.3 * (post.likes.count() / max_likes)
+
+
+        return score
+
+    candidates = sorted(candidates, key=score_post, reverse=True)
+    #debug_feed(candidates, score_post)
+    return candidates
+    
+
+
+
+# лише для тесту
 def vidlatka(authors, tags, popular_posts):
         
     author_posts = Publication.objects.filter(
@@ -134,9 +207,8 @@ def vidlatka(authors, tags, popular_posts):
 
         f.write("\n=== Популярні пости ===\n")
         for pub in popular_posts:
-            f.write(f"{pub.title} | {pub.user.username} | {pub.created_at}\n")
+            f.write(f"{pub.title} | {pub.user.username} | {pub.created_at} | {list(pub.tags.all())}\n")
         
-
 def debug_feed(candidates, score_post):
     with open("file.txt", "w", encoding="utf-8") as f:
         f.write("=== SCORED FEED ===\n")
@@ -144,3 +216,4 @@ def debug_feed(candidates, score_post):
             score = score_post(post)
             tag_names = ", ".join(tag.name for tag in post.tags.all())
             f.write(f"{post.title} | Автор: {post.user.username} | Теги: {tag_names} | Лайки: {post.likes.count()} | SCORE: {score:.3f} | {post.created_at}\n")
+

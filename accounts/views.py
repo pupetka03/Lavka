@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import CreatePublicationForm, CreateCommentsForms
 from django.http import JsonResponse
-from .recsys import get_feed_for_user
+from .recsys import get_feed_for_user, get_popular_feed, tegs_feed_popular, get_random_feed_for_user
 
 
 
@@ -48,7 +48,6 @@ def page_login(request):
         heslo = request.POST.get("password")
 
         user = authenticate(request, username=username, password=heslo)
-        print(user)
         if user is not None:
             login(request, user)
             return redirect("home_page")
@@ -59,26 +58,36 @@ def page_login(request):
     return render(request, "login.html")
 
 
-
 def out(request):
     logout(request)
     return redirect("login")
 
 
-
-
 def home_page(request):
-    #publication = Publication.objects.all()
+    #інфа якщо користувач не залогінений
     if not request.user.is_authenticated:
-        return redirect("register")
+        likes = Like.objects.all()
+        publication = get_popular_feed()
+        return render(request, "home_page.html", {"publication":publication, "likes":likes})
+    
+    #якщо залогінений
     publication = get_feed_for_user(request.user)
     likes = Like.objects.all()
     
+    #вивід популярних тегів
+    tag_info = list(tegs_feed_popular())
+    tags = Tag.objects.filter(name__in=tag_info)
 
-    return render(request, "home_page.html", {"publication":publication, "likes":likes})
+    #другий фід
+    explore_publications =  get_random_feed_for_user(request.user)
 
 
+    #liked_posts_ids = set(Like.objects.filter(user=request.user).values_list('publication_id', flat=True))
+    #publication = [p for p in publication if p.id not in liked_posts_ids]
 
+    
+
+    return render(request, "home_page.html", {"publication":publication, "explore_publications":explore_publications, "likes":likes, "tags":tags})
 
 
 def create_publication(request):
@@ -108,8 +117,6 @@ def create_publication(request):
     
     else:
         return redirect("login")
-
-
 
 
 @login_required
@@ -146,14 +153,16 @@ def create_comments(request, slug, parent=None):
     return render(request, "create_c.html", {"form":form})
 
 
-
-
-
-
 def open_publication(request, slug):
     pub = get_object_or_404(Publication, slug=slug)
     return render(request, "pub.html", {"pub":pub})
 
+def test(request):
+    tags = list(tegs_feed_popular())
+    tag_info = Tag.objects.filter(name__in=tags)
 
+
+    
+    return redirect('home_page')
 
 

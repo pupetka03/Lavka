@@ -1,203 +1,546 @@
-
-    <div class="publication-wrapper">
-
-        <div class="post-content">
-            <div class="post-header">
-                <div class="post-author">
-                    {{ pub.title }} <span class="post-handle">@{{ pub.user.username }}</span>
+<div class="publication-wrapper">
+    <div class="post-content">
+        <div class="post-header">
+            <div class="post-author-info">
+                <div class="author-avatar">
+                    {{ pub.user.username|first|upper }}
+                </div>
+                <div class="author-details">
+                    <div class="post-author">
+                        {{ pub.title }} <span class="post-handle">@{{ pub.user.username }}</span>
+                    </div>
+                    <div class="post-time">{{ pub.created_at|timesince }} тому</div>
                 </div>
             </div>
-            <div class="post-text">{{ pub.text }}.</div>
-            
-            <div class="post-stats">
-
-                <a href="{% url 'create_comments' pub.slug %}" class="stat-link comment-link">
-                    💬 {{ pub.comments.count }}
-                </a>
-                &nbsp;&nbsp;
-
-                <span class="like-button stat-link" data-slug="{{ pub.slug }}">
-                    ❤️ <span class="like-count">{{ pub.likes.count }}</span>
-                </span>
+            <div class="post-actions">
+                <button class="action-btn more-btn">⋯</button>
             </div>
         </div>
-      {% if pub.comments.all %}
-{% for comment in pub.comments.all %}
-    <div style="margin-left: {% if comment.parent %}40px{% else %}0{% endif %};">
-        <b>{{ comment.user }}</b>: {{ comment.text }}
-        <small>{{ comment.created_at }}</small>
+        
+        <div class="post-text">{{ pub.text }}</div>
+        
+        {% if pub.tags.all %}
+        <div class="post-tags">
+            {% for tag in pub.tags.all %}
+                <span class="tag">#{{ tag.name }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="post-stats">
+            <a href="{% url 'create_comments' pub.slug %}" class="stat-link comment-link">
+                <span class="stat-icon">💬</span>
+                <span class="stat-count">{{ pub.comments.count }}</span>
+            </a>
 
-        <a href="{% url 'create_reply' pub.slug comment.id %}">Відповісти</a>
+            <span class="like-button stat-link" data-slug="{{ pub.slug }}">
+                <span class="stat-icon">❤️</span>
+                <span class="like-count stat-count">{{ pub.likes.count }}</span>
+            </span>
+
+            <button class="stat-link share-btn">
+                <span class="stat-icon">↗️</span>
+                <span class="stat-count">Поділитися</span>
+            </button>
+        </div>
     </div>
-{% endfor %}
-{% endif %}
+
+    {% if pub.comments.all %}
+    <div class="comments-container">
+        <div class="comments-header">
+            <h4>Коментарі ({{ pub.comments.count }})</h4>
+        </div>
+        
+        {% for comment in pub.comments.all %}
+            {% if not comment.parent %}
+            <div class="comment-thread">
+                <div class="comment-section-wrapper">
+                    <div class="comment-header">
+                        <div class="comment-author-avatar">
+                            {{ comment.user.username|first|upper }}
+                        </div>
+                        <div class="comment-author-info">
+                            <span class="comment-author">{{ comment.user.username }}</span>
+                            <span class="comment-time">{{ comment.created_at|timesince }} тому</span>
+                        </div>
+                    </div>
+                    <div class="comment-text">{{ comment.text }}</div>
+                    <div class="comment-actions">
+                        <a href="{% url 'create_reply' pub.slug comment.id %}" class="reply-btn">Відповісти</a>
+                        <button class="comment-like-btn" data-comment-id="{{ comment.id }}">
+                            ♡ <span class="comment-like-count">{{ comment.likes.count }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                {% for reply in comment.replies.all %}
+                <div class="replies-wrapper">
+                    <div class="reply-item">
+                        <div class="reply-header">
+                            <div class="reply-author-avatar">
+                                {{ reply.user.username|first|upper }}
+                            </div>
+                            <div class="reply-author-info">
+                                <span class="reply-author">{{ reply.user.username }}</span>
+                                <span class="reply-time">{{ reply.created_at|timesince }} тому</span>
+                            </div>
+                        </div>
+                        <div class="reply-text">
+                            <span class="reply-to">@{{ comment.user.username }}</span> {{ reply.text }}
+                        </div>
+                        <div class="reply-actions">
+                            <button class="reply-like-btn" data-comment-id="{{ reply.id }}">
+                                ♡ <span class="reply-like-count">{{ reply.likes.count }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
 
 <style>
-
-    
     /* ------------------------------------------------------------------- */
-    /* КОМЕНТАРІ ТА ВІДПОВІДІ (ГОЛОВНА ЗМІНА) */
-    /* (Залиште попередні стилі для .comment-section-wrapper) */
+    /* ОСНОВНА СТРУКТУРА ПУБЛІКАЦІЇ */
     /* ------------------------------------------------------------------- */
-
-    /* Обгортка одного коментаря (як було раніше, з відступом 25px) */
-    .comment-section-wrapper {
-        padding: 10px;
-        margin-bottom: 8px;
-        background-color: #F7F9FA;
-        border-radius: 8px;
+    .publication-wrapper {
         border: 1px solid #E1E8ED;
-        margin-left: 25px; 
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background-color: #FFFFFF;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .publication-wrapper:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-color: #CCD6DD;
     }
 
-    /* Обгортка всіх відповідей на один коментар */
+    /* ------------------------------------------------------------------- */
+    /* ЗАГОЛОВОК ПУБЛІКАЦІЇ */
+    /* ------------------------------------------------------------------- */
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+
+    .post-author-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .author-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1DA1F2, #794BC4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .author-details {
+        flex: 1;
+    }
+
+    .post-author {
+        font-weight: 700;
+        color: #14171A;
+        font-size: 16px;
+        line-height: 1.3;
+    }
+
+    .post-handle {
+        font-weight: 400;
+        color: #657786;
+        font-size: 14px;
+    }
+
+    .post-time {
+        color: #657786;
+        font-size: 13px;
+        margin-top: 2px;
+    }
+
+    .post-actions {
+        position: relative;
+    }
+
+    .more-btn {
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: #657786;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+
+    .more-btn:hover {
+        background-color: #F7F9FA;
+        color: #1DA1F2;
+    }
+
+    /* ------------------------------------------------------------------- */
+    /* ТЕКСТ ПУБЛІКАЦІЇ */
+    /* ------------------------------------------------------------------- */
+    .post-text {
+        margin: 12px 0;
+        line-height: 1.6;
+        color: #14171A;
+        font-size: 15px;
+        word-wrap: break-word;
+    }
+
+    /* ------------------------------------------------------------------- */
+    /* ТЕГИ */
+    /* ------------------------------------------------------------------- */
+    .post-tags {
+        margin: 12px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .tag {
+        color: #1DA1F2;
+        font-size: 13px;
+        padding: 4px 8px;
+        background-color: #F7F9FA;
+        border-radius: 12px;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .tag:hover {
+        background-color: #1DA1F2;
+        color: white;
+    }
+
+    /* ------------------------------------------------------------------- */
+    /* СТАТИСТИКА */
+    /* ------------------------------------------------------------------- */
+    .post-stats {
+        display: flex;
+        gap: 20px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #F0F3F4;
+    }
+
+    .stat-link {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        color: #657786;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+        padding: 6px 12px;
+        border-radius: 8px;
+        background: none;
+        border: none;
+    }
+
+    .stat-link:hover {
+        color: #1DA1F2;
+        background-color: #F7F9FA;
+    }
+
+    .like-button:hover {
+        color: #E0245E;
+        background-color: #FCE8F0;
+    }
+
+    .stat-icon {
+        font-size: 16px;
+    }
+
+    .stat-count {
+        font-weight: 500;
+    }
+
+    /* ------------------------------------------------------------------- */
+    /* КОМЕНТАРІ */
+    /* ------------------------------------------------------------------- */
+    .comments-container {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #F0F3F4;
+    }
+
+    .comments-header h4 {
+        margin: 0 0 16px 0;
+        color: #14171A;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .comment-thread {
+        margin-bottom: 16px;
+    }
+
+    .comment-section-wrapper {
+        padding: 16px;
+        background-color: #F7F9FA;
+        border-radius: 12px;
+        border: 1px solid #E1E8ED;
+        margin-bottom: 8px;
+    }
+
+    .comment-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .comment-author-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #17BF63, #1DA1F2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+        flex-shrink: 0;
+    }
+
+    .comment-author-info {
+        flex: 1;
+    }
+
+    .comment-author {
+        font-weight: 600;
+        color: #14171A;
+        font-size: 14px;
+    }
+
+    .comment-time {
+        color: #657786;
+        font-size: 12px;
+        margin-left: 8px;
+    }
+
+    .comment-text {
+        margin: 8px 0;
+        line-height: 1.5;
+        color: #14171A;
+        font-size: 14px;
+    }
+
+    .comment-actions {
+        display: flex;
+        gap: 16px;
+        margin-top: 12px;
+    }
+
+    .reply-btn, .comment-like-btn {
+        background: none;
+        border: none;
+        color: #657786;
+        font-size: 13px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .reply-btn:hover {
+        color: #1DA1F2;
+        background-color: #E8F5FE;
+    }
+
+    .comment-like-btn:hover {
+        color: #E0245E;
+        background-color: #FCE8F0;
+    }
+
+    /* ------------------------------------------------------------------- */
+    /* ВІДПОВІДІ */
+    /* ------------------------------------------------------------------- */
     .replies-wrapper {
-        /* Додаємо невеликий вертикальний простір */
-            margin-top: 5px; 
+        margin-left: 42px;
+        margin-top: 8px;
     }
 
-    /* Стиль для самої відповіді (вкладеного коментаря) */
     .reply-item {
-        padding: 8px;
-        margin-bottom: 5px;
-       background-color: #EFF4F7; /* Ще світліший фон, ніж у батьківського коментаря */
-       border-radius: 6px;
-       border-left: 3px solid #1DA1F2; /* Використовуємо синю смужку для акценту */
-       font-size: 0.85em; /* Трохи менший шрифт */
-
-       /* ЗМІЩЕННЯ ВПРАВО - ОСНОВНА ВИПРАВЛЕННЯ (додатковий відступ) */
-        margin-left: 25px; /* Загальний відступ від початку публікації буде 50px */
+        padding: 12px;
+        background-color: #EFF4F7;
+        border-radius: 8px;
+        border-left: 3px solid #1DA1F2;
+        margin-bottom: 6px;
     }
 
-    /* ------------------------------------------------------------------- */
-    /* АВТОР ВІДПОВІДІ */
-    /* ------------------------------------------------------------------- */
+    .reply-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .reply-author-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #794BC4, #E0245E);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 10px;
+        flex-shrink: 0;
+    }
+
+    .reply-author-info {
+        flex: 1;
+    }
+
     .reply-author {
         font-weight: 600;
         color: #14171A;
-        margin-bottom: 3px;
+        font-size: 13px;
     }
 
-    /* Стиль для виділення, кому саме була відповідь */
-    .reply-author .post-handle {
-        font-weight: normal;
+    .reply-time {
         color: #657786;
-        font-size: 0.9em;
+        font-size: 11px;
+        margin-left: 6px;
     }
 
     .reply-text {
         line-height: 1.4;
         color: #14171A;
+        font-size: 13px;
     }
 
-
-    /* ------------------------------------------------------------------- */
-    /* ОСНОВНА СТРУКТУРА ПУБЛІКАЦІЇ */
-    /* ------------------------------------------------------------------- */
-    .publication-wrapper {
-        border: 1px solid #E1E8ED; /* Світло-сірий бордюр, як у соцмережах */
-        border-radius: 12px;
-        padding: 15px;
-        margin-bottom: 20px;
-        background-color: #FFFFFF;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Легка тінь */
-        transition: box-shadow 0.3s ease;
-    }
-    .publication-wrapper:hover {
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Тінь при наведенні */
+    .reply-to {
+        color: #1DA1F2;
+        font-weight: 500;
     }
 
-    /* ------------------------------------------------------------------- */
-    /* ЗАГОЛОВКИ ТА ТЕКСТ */
-    /* ------------------------------------------------------------------- */
-    .post-author {
-        font-weight: 700; /* Жирніше */
-        color: #14171A; /* Темний текст */
-        font-size: 1.1em;
-        margin-bottom: 2px;
-    }
-    .post-handle {
-        font-weight: 400;
-        color: #657786; /* Сірий колір, типовий для хендлів */
-        font-size: 0.9em;
-        margin-left: 5px;
-    }
-    .post-text {
-        margin: 10px 0 15px 0;
-        line-height: 1.5;
-        color: #14171A;
+    .reply-actions {
+        margin-top: 8px;
     }
 
-    /* ------------------------------------------------------------------- */
-    /* СТАТИСТИКА (ЛАЙКИ, КОМЕНТАРІ) */
-    /* ------------------------------------------------------------------- */
-    .post-stats {
-        display: flex;
-        gap: 25px;
-        margin-top: 10px;
-        padding-top: 5px;
-        border-top: 1px solid #E1E8ED;
-    }
-    .stat-link {
-        display: flex; /* Для вирівнювання іконки та тексту */
-        align-items: center;
-        text-decoration: none;
+    .reply-like-btn {
+        background: none;
+        border: none;
         color: #657786;
+        font-size: 12px;
         cursor: pointer;
-        font-size: 0.9em;
-        transition: color 0.2s;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
     }
-    .stat-link:hover {
-        color: #1DA1F2; /* Синій для інтерактиву */
-    }
-    .like-button:hover {
-        color: #E0245E; /* Червоний для лайків */
+
+    .reply-like-btn:hover {
+        color: #E0245E;
+        background-color: #FCE8F0;
     }
 
     /* ------------------------------------------------------------------- */
-    /* КОМЕНТАРІ ТА ВІДПОВІДІ (ГОЛОВНА ЗМІНА) */
+    /* АДАПТИВНІСТЬ */
     /* ------------------------------------------------------------------- */
+    @media (max-width: 768px) {
+        .publication-wrapper {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
 
-    /* Контейнер коментарів */
-    .comments-container {
-        margin-top: 15px;
-        padding-top: 10px;
-        /* Легка межа, що відокремлює коментарі від основного тексту */
-        border-top: 1px dashed #E1E8ED;
+        .post-header {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .post-actions {
+            align-self: flex-end;
+        }
+
+        .post-stats {
+            gap: 12px;
+        }
+
+        .stat-link {
+            padding: 4px 8px;
+            font-size: 13px;
+        }
+
+        .replies-wrapper {
+            margin-left: 24px;
+        }
+
+        .comment-section-wrapper {
+            padding: 12px;
+        }
+
+        .comment-actions {
+            gap: 12px;
+        }
     }
     
-    /* Обгортка одного коментаря */
-    .comment-section-wrapper {
-        padding: 10px;
-        margin-bottom: 8px;
-        background-color: #F7F9FA; /* Дуже світлий фон для коментарів */
-        border-radius: 8px;
-        border: 1px solid #E1E8ED;
-        
-        /* ЗМІЩЕННЯ ВПРАВО - ОСНОВНА ВИПРАВЛЕННЯ */
-        margin-left: 25px; 
-        /* Кінець ЗМІЩЕННЯ */
+    
+
+    /* ------------------------------------------------------------------- */
+    /* АНІМАЦІЇ */
+    /* ------------------------------------------------------------------- */
+    @keyframes likeAnimation {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
     }
 
-    .comment-item {
-        font-size: 0.9em;
+    .liked {
+        animation: likeAnimation 0.4s ease;
+        color: #E0245E !important;
     }
-    .comment-author {
-        font-weight: 600;
-        color: #1DA1F2; /* Синій для авторів коментарів */
-    }
-    .comment-text {
-        margin-top: 5px;
-        color: #14171A;
-    }
+
+
+    
+
+    
 </style>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    // Обробка лайків для публікацій
     document.querySelectorAll('.like-button').forEach(btn => {
         btn.addEventListener('click', async () => {
-            console.log("click!");  // ✅ перевірка
             const slug = btn.dataset.slug;
+            const icon = btn.querySelector('.stat-icon');
+            
+            // Анімація
+            icon.classList.add('liked');
+            setTimeout(() => icon.classList.remove('liked'), 400);
+            
             const response = await fetch(`/like/${slug}/`, {
                 method: "POST",
                 headers: {
@@ -207,6 +550,38 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             const data = await response.json();
             btn.querySelector('.like-count').textContent = data.likes;
+        });
+    });
+
+    // Обробка лайків для коментарів
+    document.querySelectorAll('.comment-like-btn, .reply-like-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const commentId = btn.dataset.commentId;
+            const icon = btn.querySelector('span:first-child');
+            
+            // Анімація
+            icon.classList.add('liked');
+            setTimeout(() => icon.classList.remove('liked'), 400);
+            
+            // Тут можна додати запит для лайків коментарів
+            console.log('Like comment:', commentId);
+        });
+    });
+
+    // Обробка кнопки "Поділитися"
+    document.querySelectorAll('.share-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Тут можна реалізувати функціонал спільного доступу
+            console.log('Share publication');
+        });
+    });
+
+    // Обробка кнопки "Більше"
+    document.querySelectorAll('.more-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Тут можна додати випадаюче меню
+            console.log('More options');
+            e.stopPropagation();
         });
     });
 });
