@@ -476,8 +476,7 @@
         <div class="main-content">
             <!-- Перемикач фідів -->
             <div class="feed-switcher">
-                <div class="feed-tab active" data-feed="feed1">Hlavna stranka</div>
-                <div class="feed-tab" data-feed="feed2">Náhodné príspevky</div>
+                <div class="feed-tab active" data-feed="feed1">Result</div>
             </div>
 
             <!-- Перший фід -->
@@ -493,7 +492,7 @@
                     <div style="clear: both;"></div>
                 </div>
 
-                {% for pub in publication %}
+                {% for pub in posts %}
                 <div class="publication-wrapper">
                     <div>
                         <div class="post-author">
@@ -546,71 +545,6 @@
                 {% empty %}
                 <div style="padding: 20px; text-align: center; color: #5b7083;">
                     Поки що немає контенту
-                </div>
-                {% endfor %}
-            </div>
-
-            <!-- Другий фід -->
-            <div id="feed2" class="feed-content">
-                <div class="new-post-form">
-                    <form method="POST" action="{% url 'create_publication' %}">
-                        {% csrf_token %}
-                        <input type="text" name="title" placeholder="Názov" class="post-textarea" style="font-weight: bold; padding: 5px 0; margin: 5px 0;"><br>
-                        <textarea name="text" class="post-textarea" placeholder="Co sa deje?"></textarea><br>
-                        <input type="text" name="tags" class="post-textarea" placeholder="Tagy (oddeli medzerou alebo cez ,)"><br>
-                        <button type="submit" class="post-button">Publikovat</button>
-                    </form>
-                    <div style="clear: both;"></div>
-                </div>
-                {% for pub in explore_publications %}
-                <div class="publication-wrapper">
-                    <div>
-                        <div class="post-author">
-                            <a href="{% url 'profile' pub.user.username %}" class="user-avatar">
-                                {{ pub.user.username|first|upper }}
-                            </a>
-                            {{ pub.title }} 
-                            <span class="post-handle">@{{ pub.user.username }}</span>
-                        </div>
-                        <div class="post-text">
-                            <a href="{% url 'pub' pub.slug %}" style="text-decoration:none; color:inherit; cursor:pointer;">
-                                {{ pub.text }}
-                            </a>
-                        </div>
-                        <div class="post-tags">
-                            {% for tag in pub.tags.all %}
-                                <span class="tag">#{{ tag }}</span>
-                            {% endfor %}
-                        </div>
-                        <div class="post-stats">
-                            <a href="{% url 'create_comments' pub.slug %}" style="text-decoration:none; color:inherit; cursor:pointer;">
-                                💬 {{ pub.comments.count }}
-                            </a>
-                            <span class="like-button" data-slug="{{ pub.slug }}" style="cursor:pointer;">
-                                ❤️ <span class="like-count">{{ pub.likes.count }}</span>
-                            </span>
-                        </div>
-                    </div>
-                    {% for comment in pub.comments.all|slice:":3" %}
-                    {% if not comment.parent %}
-                    <div class="comment-section-wrapper">
-                        <div class="comment-item">
-                            <div class="comment-author">
-                                <a href="{% url 'profile' comment.user.username %}" class="user-avatar comment-avatar">
-                                    {{ comment.user.username|first|upper }}
-                                </a>
-                                {{ comment.user }}
-                                <span class="post-handle">@{{ comment.user }}</span>
-                            </div>
-                            <div class="comment-text">{{ comment.text }}</div>
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-                {% empty %}
-                <div style="padding: 20px; text-align: center; color: #5b7083;">
-                    Поки що немає контенту для другого фіду
                 </div>
                 {% endfor %}
             </div>

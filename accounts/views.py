@@ -6,12 +6,15 @@ from django.contrib.auth.decorators import login_required
 from .forms import CreatePublicationForm, CreateCommentsForms
 from django.http import JsonResponse
 from .recsys import get_feed_for_user, get_popular_feed, tegs_feed_popular, get_random_feed_for_user
+from rapidfuzz import process
 
 
 
 
 
 
+
+# ======= Autorisation and logout =================
 def page_register(request):
     if request.method == "POST":
         user_name = request.POST.get("user_name")
@@ -41,7 +44,6 @@ def page_register(request):
 
     return render(request, "register.html")
 
-
 def page_login(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -57,12 +59,12 @@ def page_login(request):
 
     return render(request, "login.html")
 
-
 def out(request):
     logout(request)
     return redirect("login")
 
 
+# ====== For User Interaction ==========
 def home_page(request):
     #інфа якщо користувач не залогінений
     if not request.user.is_authenticated:
@@ -88,7 +90,6 @@ def home_page(request):
     
 
     return render(request, "home_page.html", {"publication":publication, "explore_publications":explore_publications, "likes":likes, "tags":tags})
-
 
 def create_publication(request):
     if request.user.is_authenticated:
@@ -118,7 +119,6 @@ def create_publication(request):
     else:
         return redirect("login")
 
-
 @login_required
 def like_publication(request, slug):
     pub = Publication.objects.get(slug=slug)
@@ -127,7 +127,6 @@ def like_publication(request, slug):
         like.delete()
     likes_count = pub.likes.count()
     return JsonResponse({"likes": likes_count})
-
 
 @login_required
 def create_comments(request, slug, parent=None):
@@ -152,15 +151,51 @@ def create_comments(request, slug, parent=None):
 
     return render(request, "create_c.html", {"form":form})
 
-
 def open_publication(request, slug):
     pub = get_object_or_404(Publication, slug=slug)
     return render(request, "pub.html", {"pub":pub})
 
-def test(request):
-    tags = list(tegs_feed_popular())
-    tag_info = Tag.objects.filter(name__in=tags)
+def profile(request, username):
+    profile_user = get_object_or_404(User, username=username)
+    publications = Publication.objects.filter(user=profile_user).order_by('-id')
+    likes_publication = Like.objects.filter(user=profile_user).order_by('-created_at')
+    coments_user = Comments.objects.filter(user=profile_user).order_by('-created_at')
+    return render(request, 'profile.html', {
+        'profile_user': profile_user,
+        'publications': publications,
+        'likes_publication': likes_publication,
+        'coments_user':coments_user,
+    })
 
+def search(request, search):
+    tags = list(Tag.objects.values_list('name', flat=True))
+    best_match = process.extractOne(search, tags)
+
+    tag_info = list(tegs_feed_popular())
+    tags = Tag.objects.filter(name__in=tag_info)
+
+    if best_match:
+        tags_pub = Tag.objects.get(name=best_match[0])
+        posts = Publication.objects.filter(tags=tags_pub)
+        
+
+    
+    return render(request, "result_of_search.html", {"posts":posts, "tags":tags})
+
+
+
+
+
+
+# ================= Only Test, Dont for prodaction ==============================
+def test(request, search):
+
+    tags = list(Tag.objects.values_list('name', flat=True))
+    best_match = process.extractOne(search, tags)
+    if best_match:
+        tags_pub = Tag.objects.get(name=best_match[0])
+        posts = Publication.objects.filter(tags=tags_pub)
+        
 
     
     return redirect('home_page')
