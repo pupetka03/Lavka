@@ -677,8 +677,8 @@
             e.preventDefault();
             const searchQuery = searchInput.value.trim();
             if (searchQuery) {
-                // Переходимо на сторінку пошуку з параметром в URL
-                window.location.href = `search/${encodeURIComponent(searchQuery)}/`;
+                const baseUrl = window.location.origin; // отримуємо http://localhost:8000
+                window.location.href = `${baseUrl}/search/${encodeURIComponent(searchQuery)}/`;
             }
         }
     });
