@@ -7,8 +7,7 @@ from .forms import CreatePublicationForm, CreateCommentsForms
 from django.http import JsonResponse
 from .recsys import get_feed_for_user, get_popular_feed, tegs_feed_popular, get_random_feed_for_user
 from rapidfuzz import process
-
-
+from django_ratelimit.decorators import ratelimit
 
 
 
@@ -65,12 +64,22 @@ def out(request):
 
 
 # ====== For User Interaction ==========
+
 def home_page(request):
     #інфа якщо користувач не залогінений
     if not request.user.is_authenticated:
         likes = Like.objects.all()
         publication = get_popular_feed()
-        return render(request, "home_page.html", {"publication":publication, "likes":likes})
+        tag_info = list(tegs_feed_popular())
+        tags = Tag.objects.filter(name__in=tag_info)
+
+        context = {
+            "tags":tags,
+            "publication":publication,
+            "likes":likes,
+        }
+        return render(request, "home_page.html", context=context)
+    
     
     #якщо залогінений
     publication = get_feed_for_user(request.user)
@@ -91,6 +100,8 @@ def home_page(request):
 
     return render(request, "home_page.html", {"publication":publication, "explore_publications":explore_publications, "likes":likes, "tags":tags})
 
+
+@ratelimit(key='ip', rate='2/m', method='POST', block=True)
 def create_publication(request):
     if request.user.is_authenticated:
 
@@ -129,10 +140,12 @@ def like_publication(request, slug):
     return JsonResponse({"likes": likes_count})
 
 @login_required
+@ratelimit(key='ip', rate='2/m', method='POST', block=True)
 def create_comments(request, slug, parent=None):
     if request.method == "POST":
         pub = Publication.objects.get(slug=slug)
         form = CreateCommentsForms(request.POST)
+
         if form.is_valid():
             obj = form.save(commit = False)
             obj.user = request.user

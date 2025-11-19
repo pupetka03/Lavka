@@ -466,8 +466,13 @@
             <nav>
                 <a href="{% url "home_page" %}"><span></span><span>Domov</span></a>
                 <a href="#" id="search-toggle"><span></span><span>Hľadať</span></a>
+                {% if request.user.is_authenticated %}
                 <a href="{% url 'profile' user.username %}"><span></span><span>Profil</span></a>
+                {%endif%}
                 <a href=""><span></span><span>OnlyForTest</span></a>
+                {% if not request.user.is_authenticated %}
+                    <a href="{%url "login"%}"><span></span><span>Login</span></a>
+                {%endif%}
             </nav>
             <button class="post-button" style="width: 100%; margin-top: 20px;">Lavka</button>
         </div>
@@ -476,7 +481,9 @@
             <!-- Перемикач фідів -->
             <div class="feed-switcher">
                 <div class="feed-tab active" data-feed="feed1">Hlavna stranka</div>
-                <div class="feed-tab" data-feed="feed2">Náhodné príspevky</div>
+                {%if request.user.is_authenticated%}
+                <div class="feed-tab" data-feed="feed2">Nove príspevky</div>
+                {%endif%}
             </div>
 
             <!-- Перший фід -->
@@ -516,9 +523,15 @@
                             {% endfor %}
                         </div>
                         <div class="post-stats">
+                            {%if request.user.is_authenticated%}
                             <a href="{% url 'create_comments' pub.slug %}" style="text-decoration:none; color:inherit; cursor:pointer;">
                                 💬 {{ pub.comments.count }}
                             </a>
+                            {%else%}
+                            <a style="text-decoration:none; color:inherit; cursor:pointer;">
+                                💬 {{ pub.comments.count }}
+                            </a>
+                            {%endif%}
                             <span class="like-button" data-slug="{{ pub.slug }}" style="cursor:pointer;">
                                 ❤️ <span class="like-count">{{ pub.likes.count }}</span>
                             </span>
@@ -544,7 +557,7 @@
                 </div>
                 {% empty %}
                 <div style="padding: 20px; text-align: center; color: #5b7083;">
-                    Поки що немає контенту
+                    Zatiaľ žiadny obsah
                 </div>
                 {% endfor %}
             </div>
@@ -609,7 +622,7 @@
                 </div>
                 {% empty %}
                 <div style="padding: 20px; text-align: center; color: #5b7083;">
-                    Поки що немає контенту для другого фіду
+                    Zatiaľ nie je k dispozícii žiadny obsah pre nováčikov.
                 </div>
                 {% endfor %}
             </div>

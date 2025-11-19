@@ -3,7 +3,7 @@
         <div class="reply-avatar">{{ reply.user.username|first|upper }}</div>
         <div class="reply-info">
             <span class="reply-author">{{ reply.user.username }}</span>
-            <span class="reply-time">{{ reply.created_at|timesince }} тому</span>
+            <span class="reply-time">{{ reply.created_at|timesince }} pred</span>
         </div>
     </div>
 
@@ -17,7 +17,7 @@
             ♡ <span class="reply-like-count">{{ reply.likes.count }}</span>
         </button>
     <button class="reply-reply-btn" data-comment-id="{{ reply.id }}" onclick="window.location.href='{% url 'create_reply' pub.slug reply.id %}'">
-        💬 Відповісти
+        💬 Odpoved
     </button>
     </div>
 

@@ -102,7 +102,7 @@
             </div>
                     <div class="text-center">
             <a href="{% url 'home_page' %}" class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg transition">
-                ← Назад до стрічки
+                ← Naspat na hlavnu
             </a>
         </div>
         </div>
@@ -124,26 +124,31 @@
             <!-- Твіти юзера -->
             <div id="posts" class="tab-content active p-4">
                 {% if publications %}
-{% for post in publications %}
-    <a href="{% url 'pub' post.slug %}" class="block border border-gray-200 rounded-lg p-4 mb-3 hover:bg-gray-50 transition">
-        <div class="flex justify-between items-start mb-2">
-            <div class="font-semibold text-gray-900">{{ post.title }}</div>
-            <div class="text-sm text-gray-500">{{ post.created_at|date:"d.m.Y" }}</div>
-        </div>
-        <div class="text-gray-800 mb-3">{{ post.text }}</div>
-        <div class="flex gap-4 text-sm text-gray-600">
-            <span>💬 {{ post.comments.count }}</span>
-            <span>❤️ {{ post.likes.count }}</span>
-        </div>
-    </a>
+    {% for post in publications %}
+        <a href="{% url 'pub' post.slug %}" class="block mb-3 hover:bg-gray-50 transition rounded-lg p-4 border bg-white">
+            <div class="flex justify-between items-start mb-2">
+                <div class="font-semibold text-gray-900">@{{ post.user.username }}</div>
+                <div class="text-sm text-gray-500">{{ post.created_at|date:"d.m.Y" }}</div>
+            </div>
+            <div class="text-gray-800 mb-2">{{ post.text }}</div>
+            <div class="flex gap-4 text-sm text-gray-600">
+                <span>💬 {{ post.comments.count }}</span>
+                <span>❤️ {{ post.likes.count }}</span>
+            </div>
+        </a>
 {% endfor %}
-                {% else %}
-                    <div class="empty-state">
-                        <div class="text-4xl mb-2">📝</div>
-                        <div class="text-lg font-medium">Ще немає твітів</div>
-                        <div class="text-gray-500">Створіть свій перший твіт!</div>
-                    </div>
-                {% endif %}
+{% elif request.user == profile_user %}
+    <div class="empty-state">
+        <div class="text-4xl mb-2">📝</div>
+        <div class="text-lg font-medium">Ešte ste nevytvorili žiadne príspevky.</div>
+        <div class="text-gray-500">Vytvorte si svoju prvú publikáciu!</div>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="text-4xl mb-2">📝</div>
+        <div class="text-lg font-medium">Tento používateľ ešte nemá žiadne príspevky.</div>
+    </div>
+{% endif %}
             </div>
 
             <!-- Лайкнуті твіти -->
@@ -153,19 +158,24 @@
     <a href="{% url 'pub' post.publication.slug %}" class="block like-badge mb-3 hover:bg-gray-50 transition rounded-lg p-4">
         <div class="flex justify-between items-start mb-2">
             <div class="font-semibold text-gray-900">{{ post.publication.title }}</div>
-            <div class="text-sm text-gray-500">Лайкнуто {{ post.created_at|date:"d.m.Y" }}</div>
+            <div class="text-sm text-gray-500">Páčilo sa {{ post.created_at|date:"d.m.Y" }}</div>
         </div>
         <div class="text-gray-800 mb-2">{{ post.publication.text|truncatewords:20 }}</div>
         <div class="text-sm text-gray-600">
-            Автор: @{{ post.user }}
+            Autor: @{{ post.user }}
         </div>
     </a>
 {% endfor %}
+                {% elif request.user == profile_user %}
+                    <div class="empty-state">
+                        <div class="text-4xl mb-2">❤️</div>
+                        <div class="text-lg font-medium">Zatiaľ nemate príspevky s označením „páči sa mi to“</div>
+                        <div class="text-gray-500">Dajte lajk, aby sa tu zobrazovali príspevky</div>
+                    </div>
                 {% else %}
                     <div class="empty-state">
                         <div class="text-4xl mb-2">❤️</div>
-                        <div class="text-lg font-medium">Ще немає вподобаних твітів</div>
-                        <div class="text-gray-500">Лайкайте твіти, щоб вони з'явилися тут</div>
+                        <div class="text-lg font-medium">Zatiaľ žiadne príspevky s označením „páči sa mi to“</div>
                     </div>
                 {% endif %}
             </div>
@@ -176,24 +186,30 @@
                     {% for comment in coments_user %}
     <a href="{% url 'pub' comment.publication.slug %}" class="block comment-badge mb-3 hover:bg-gray-50 transition rounded-lg p-4">
         <div class="flex justify-between items-start mb-2">
-            <div class="font-semibold text-gray-900">До твіту: {{ comment.publication.title }}</div>
+            <div class="font-semibold text-gray-900">K publikácie: {{ comment.publication.title }}</div>
             <div class="text-sm text-gray-500">{{ comment.created_at|date:"d.m.Y" }}</div>
         </div>
         <div class="text-gray-800 mb-2">{{ comment.text }}</div>
         <div class="text-sm text-gray-600">
             {% if comment.parent %}
-                💬 Відповідь на коментар @{{ comment.parent.user.username }}
+                💬 Odpoved na komentár @{{ comment.parent.user.username }}
             {% else %}
-                💬 Коментар
+                💬 komentár
             {% endif %}
         </div>
     </a>
 {% endfor %}
+                {% elif request.user == profile_user %}
+                     <div class="empty-state">
+                        <div class="text-4xl mb-2">💬</div>
+                        <div class="text-lg font-medium">Zatiaľ nemate žiadne komentáre</div>
+                        <div class="text-gray-500">Zanechajte svoj prvý komentár!</div>
+                    </div>
+                
                 {% else %}
                     <div class="empty-state">
                         <div class="text-4xl mb-2">💬</div>
-                        <div class="text-lg font-medium">Ще немає коментарів</div>
-                        <div class="text-gray-500">Залиште свій перший коментар!</div>
+                        <div class="text-lg font-medium">Zatiaľ žiadne komentáre</div>
                     </div>
                 {% endif %}
             </div>
@@ -202,7 +218,7 @@
         <!-- Кнопка назад -->
         <div class="text-center">
             <a href="{% url 'home_page' %}" class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg transition">
-                ← Назад до стрічки
+                ← Naspat na hlavnu
             </a>
         </div>
     </div>

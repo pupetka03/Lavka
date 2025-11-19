@@ -60,7 +60,11 @@ def get_feed_for_user(user):
 
     # Готуємо нормалізацію
     max_likes = max((p.likes.count() for p in candidates), default=1)
-    max_comments = max((Comments.objects.filter(publication=pub1).count() for pub1 in candidates))
+    if max_likes == 0:
+        max_likes = 1
+    max_comments = max((Comments.objects.filter(publication=pub1).count() for pub1 in candidates), default=1)
+    if max_comments == 0:
+        max_comments = 1
 
     def score_post(post):
         score = 0
@@ -103,7 +107,7 @@ def get_feed_for_user(user):
                 candidates.insert(i, p)
                 i += step
     #vidlatka(authors, tags, popular_posts)
-    #debug_feed(candidates, score_post)
+    debug_feed(candidates, score_post)
     return candidates
 
 
@@ -163,7 +167,13 @@ def get_random_feed_for_user(user):
     
     #======== Ранжування =========
     max_likes = max((p.likes.count() for p in candidates), default=1)
-    max_comments = max((Comments.objects.filter(publication=pub1).count() for pub1 in candidates))
+    max_comments = max((Comments.objects.filter(publication=pub1).count() for pub1 in candidates), default=1)
+
+    if max_comments == 0:
+        max_comments = 1
+    if max_likes == 0:
+        max_likes = 1
+
     def score_post(post):
         score = 0
 
@@ -171,7 +181,7 @@ def get_random_feed_for_user(user):
             score -= 1
 
         if Like.objects.filter(publication=post).exists():
-            score -= 1
+            score -= 2
 
         age_seconds = (timezone.now() - post.created_at).total_seconds()
         freshness = max(0, 1 - age_seconds / (60 * 60 * 24))  # за добу згасає
@@ -184,7 +194,7 @@ def get_random_feed_for_user(user):
         return score
 
     candidates = sorted(candidates, key=score_post, reverse=True)
-    #debug_feed(candidates, score_post)
+    debug_feed(candidates, score_post)
     return candidates
     
 

@@ -9,7 +9,7 @@
                     <div class="post-author">
                         {{ pub.title }} <span class="post-handle">@{{ pub.user.username }}</span>
                     </div>
-                    <div class="post-time">{{ pub.created_at|timesince }} тому</div>
+                    <div class="post-time">{{ pub.created_at|timesince }} pred</div>
                 </div>
             </div>
             <div class="post-actions">
@@ -28,10 +28,18 @@
         {% endif %}
         
         <div class="post-stats">
+            {%if request.user.is_authenticated%}
             <a href="{% url 'create_comments' pub.slug %}" class="stat-link comment-link">
                 <span class="stat-icon">💬</span>
                 <span class="stat-count">{{ pub.comments.count }}</span>
             </a>
+            {%else%}
+            <a class="stat-link comment-link">
+                <span class="stat-icon">💬</span>
+                <span class="stat-count">{{ pub.comments.count }}</span>
+            </a>
+            {%endif%}
+
 
             <span class="like-button stat-link" data-slug="{{ pub.slug }}">
                 <span class="stat-icon">❤️</span>
@@ -40,12 +48,12 @@
 
             <button class="stat-link share-btn">
                 <span class="stat-icon">↗️</span>
-                <span class="stat-count">Поділитися</span>
+                <span class="stat-count">Zdieľať</span>
             </button>
 
             <div class="like-button stat-link">
                 <a href="{% url 'home_page' %}" class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg transition">
-                    ← Назад до стрічки
+                    ← Späť do hlavnej stranke
                  </a>
             </div>
 
@@ -55,7 +63,7 @@
     {% if pub.comments.all %}
     <div class="comments-container">
         <div class="comments-header">
-            <h4>Коментарі ({{ pub.comments.count }})</h4>
+            <h4>Komentare ({{ pub.comments.count }})</h4>
         </div>
         
         {% for comment in pub.comments.all %}
@@ -68,12 +76,16 @@
                         </div>
                         <div class="comment-author-info">
                             <span class="comment-author">{{ comment.user.username }}</span>
-                            <span class="comment-time">{{ comment.created_at|timesince }} тому</span>
+                            <span class="comment-time">{{ comment.created_at|timesince }} pred</span>
                         </div>
                     </div>
                     <div class="comment-text">{{ comment.text }}</div>
                     <div class="comment-actions">
-                        <a href="{% url 'create_reply' pub.slug comment.id %}" class="reply-btn">Відповісти</a>
+                        {%if request.user.is_authenticated%}
+                            <a href="{% url 'create_reply' pub.slug comment.id %}" class="reply-btn">Odpoveď</a>
+                        {%else%}
+                            <a class="reply-btn">Odpoveď</a>
+                        {%endif%}
                         <button class="comment-like-btn" data-comment-id="{{comment}}">
                             ♡ <span class="comment-like-count">{{ comment.likes.count }}</span>
                         </button>
