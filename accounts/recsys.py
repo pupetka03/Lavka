@@ -13,7 +13,7 @@ from random import shuffle
 
 
 #this is recomendation systems only for publication
-TIME_LIMIT = timezone.now() - timedelta(days=1)
+TIME_LIMIT = timezone.now() - timedelta(days=100)
 
 
 

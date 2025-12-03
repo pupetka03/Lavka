@@ -41,7 +41,7 @@ def page_register(request):
         return redirect("login")
 
 
-    return render(request, "register.html")
+    return render(request, "auth/register.html")
 
 def page_login(request):
     if request.method == "POST":
@@ -56,7 +56,7 @@ def page_login(request):
             messages.error(request, "Nesprávne prihlasovacie meno alebo heslo")
             return redirect("login")
 
-    return render(request, "login.html")
+    return render(request, "auth/login.html")
 
 def out(request):
     logout(request)
@@ -78,7 +78,7 @@ def home_page(request):
             "publication":publication,
             "likes":likes,
         }
-        return render(request, "home_page.html", context=context)
+        return render(request, "feed/home_page.html", context=context)
     
     
     #якщо залогінений
@@ -98,7 +98,7 @@ def home_page(request):
 
     
 
-    return render(request, "home_page.html", {"publication":publication, "explore_publications":explore_publications, "likes":likes, "tags":tags})
+    return render(request, "feed/home_page.html", {"publication":publication, "explore_publications":explore_publications, "likes":likes, "tags":tags})
 
 
 @ratelimit(key='ip', rate='2/m', method='POST', block=True)
@@ -162,18 +162,18 @@ def create_comments(request, slug, parent=None):
     else:
         form = CreateCommentsForms()
 
-    return render(request, "create_c.html", {"form":form})
+    return render(request, "post_users/create_c.html", {"form":form})
 
 def open_publication(request, slug):
     pub = get_object_or_404(Publication, slug=slug)
-    return render(request, "pub.html", {"pub":pub})
+    return render(request, "post_users/pub.html", {"pub":pub})
 
 def profile(request, username):
     profile_user = get_object_or_404(User, username=username)
     publications = Publication.objects.filter(user=profile_user).order_by('-id')
     likes_publication = Like.objects.filter(user=profile_user).order_by('-created_at')
     coments_user = Comments.objects.filter(user=profile_user).order_by('-created_at')
-    return render(request, 'profile.html', {
+    return render(request, 'auth/profile.html', {
         'profile_user': profile_user,
         'publications': publications,
         'likes_publication': likes_publication,
@@ -193,7 +193,7 @@ def search(request, search):
         
 
     
-    return render(request, "result_of_search.html", {"posts":posts, "tags":tags})
+    return render(request, "feed/result_of_search.html", {"posts":posts, "tags":tags})
 
 
 

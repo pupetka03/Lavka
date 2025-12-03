@@ -1,0 +1,21 @@
+     
+    {% block content %}
+    {% load number_filters %}
+    <div class="container">
+
+        <div class="sidebar-left">
+            <nav>
+                <a href="{% url "home_page" %}"><span></span><span>Domov</span></a>
+                <a href="#" id="search-toggle"><span></span><span>Hľadať</span></a>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'profile' user.username %}"><span></span><span>Profil</span></a>
+                {%endif%}
+                <a href=""><span></span><span>OnlyForTest</span></a>
+                {% if not request.user.is_authenticated %}
+                    <a href="{%url "login"%}"><span></span><span>Login</span></a>
+                {%endif%}
+            </nav>
+            <button class="post-button" style="width: 100%; margin-top: 20px;">Lavka</button>
+        </div>
+
+    {% endblock %}

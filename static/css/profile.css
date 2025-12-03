@@ -1,0 +1,62 @@
+        .profile-tab {
+            padding: 15px 20px;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .profile-tab.active {
+            border-bottom-color: #1da1f2;
+            color: #1da1f2;
+            background: #f7f9fa;
+        }
+        .profile-tab:hover {
+            background: #f7f9fa;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .user-badge {
+            background: linear-gradient(135deg, #1da1f2, #794bc4);
+            color: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0 auto 15px;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1da1f2;
+        }
+        .stat-label {
+            color: #657786;
+            font-size: 14px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #657786;
+        }
+        .comment-badge {
+            background: #f7f9fa;
+            border-left: 4px solid #1da1f2;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .like-badge {
+            background: #fff5f5;
+            border-left: 4px solid #e0245e;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }

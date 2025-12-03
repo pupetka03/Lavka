@@ -1,19 +1,12 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FX</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
+
         /* Базові стилі */
-        body {
+body {
             font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f7f9f9;
             color: #1a1a1a;
-        }
+}
 
         /* Контейнер макету */
         .container {
@@ -453,238 +446,70 @@
                 align-items: center;
             }
         }
-    </style>
-</head>
-<body>
 
-    {% load number_filters %}
-    
 
-    <div class="container">
 
-        <div class="sidebar-left">
-            <nav>
-                <a href="{% url "home_page" %}"><span></span><span>Domov</span></a>
-                <a href="#" id="search-toggle"><span></span><span>Hľadať</span></a>
-                {%if request.user.is_authenticated%}
-                <a href="{% url 'profile' user.username %}"><span></span><span>Profil</span></a>
-                {%endif%}
-            </nav>
-            <button class="post-button" style="width: 100%; margin-top: 20px;">Lavka</button>
-        </div>
 
-        <div class="main-content">
-            <!-- Перемикач фідів -->
-            <div class="feed-switcher">
-                <div class="feed-tab active" data-feed="feed1">Result</div>
-            </div>
 
-            <!-- Перший фід -->
-            <div id="feed1" class="feed-content active">
-                <div class="new-post-form">
-                    <form method="POST" action="{% url 'create_publication' %}">
-                        {% csrf_token %}
-                        <input type="text" name="title" placeholder="Názov" class="post-textarea" style="font-weight: bold; padding: 5px 0; margin: 5px 0;"><br>
-                        <textarea name="text" class="post-textarea" placeholder="Co sa deje?"></textarea><br>
-                        <input type="text" name="tags" class="post-textarea" placeholder="Tagy (oddeli medzerou alebo cez ,)"><br>
-                        <button type="submit" class="post-button">Publikovat</button>
-                    </form>
-                    <div style="clear: both;"></div>
-                </div>
-
-                {% for pub in posts %}
-                <div class="publication-wrapper">
-                    <div>
-                        <div class="post-author">
-                            <a href="{% url 'profile' pub.user.username %}" class="user-avatar">
-                                {{ pub.user.username|first|upper }}
-                            </a>
-                            {{ pub.title }} 
-                            <span class="post-handle">
-                                @{{ pub.user.username }}
-                            </span>
-                        </div>
-
-                        <div class="post-text">
-                            <a href="{% url 'pub' pub.slug %}" style="text-decoration:none; color:inherit; cursor:pointer;">
-                                {{ pub.text }}
-                            </a>
-                        </div>
-                        <div class="post-tags">
-                            {% for tag in pub.tags.all %}
-                                <span class="tag">#{{ tag }}</span>
-                            {% endfor %}
-                        </div>
-                        <div class="post-stats">
-                            <a href="{% url 'create_comments' pub.slug %}" style="text-decoration:none; color:inherit; cursor:pointer;">
-                                💬 {{ pub.comments.count }}
-                            </a>
-                            <span class="like-button" data-slug="{{ pub.slug }}" style="cursor:pointer;">
-                                ❤️ <span class="like-count">{{ pub.likes.count }}</span>
-                            </span>
-                        </div>
-                    </div>
-
-                    {% for comment in pub.comments.all|slice:":3" %}
-                    {% if not comment.parent %}
-                    <div class="comment-section-wrapper">
-                        <div class="comment-item">
-                            <div class="comment-author">
-                                <a href="{% url 'profile' comment.user.username %}" class="user-avatar comment-avatar">
-                                    {{ comment.user.username|first|upper }}
-                                </a>
-                                {{ comment.user }}
-                                <span class="post-handle">@{{ comment.user }}</span>
-                            </div>
-                            <div class="comment-text">{{ comment.text }}</div>
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-                {% empty %}
-                <div style="padding: 20px; text-align: center; color: #5b7083;">
-                    Поки що немає контенту
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <div class="sidebar-right">
-            <div class="trends-block">
-                <h3>Trendy tags</h3>
-                {% for tag in tags %}
-                <div class="trend-item">
-                    <div class="trend-name">{{ tag.name }}</div>
-                    <div class="trend-category">{{ tag.usage_count|humanize_k }} твітів</div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-    <!-- Модальне вікно пошуку -->
-<div id="search-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md mx-auto">
-            <!-- Заголовок -->
-            <div class="flex items-center justify-between p-4 border-b">
-                <h3 class="text-lg font-bold">Hľadať</h3>
-                <button id="search-close" class="text-gray-500 hover:text-gray-700 text-2xl">
-                    ×
-                </button>
-            </div>
-            
-            <!-- Поле пошуку -->
-            <div class="p-4">
-                <input 
-                    type="text" 
-                    id="search-input"
-                    placeholder="Zadajte vyhľadávací dopyt..."
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-            </div>
-            
-            <!-- Підвал -->
-            <div class="p-4 border-t text-sm text-gray-500">
-                Stlačením klávesu Enter spustíte vyhľadávanie
-            </div>
-        </div>
-    </div>
-</div>
-
-    </div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        // Обробка перемикача фідів
-        document.querySelectorAll('.feed-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.feed-tab').forEach(t => {
-                    t.classList.remove('active');
-                });
-                tab.classList.add('active');
-                
-                document.querySelectorAll('.feed-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-                const feedId = tab.getAttribute('data-feed');
-                document.getElementById(feedId).classList.add('active');
-            });
-        });
-
-        // Обробка лайків
-        document.querySelectorAll('.like-button').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const slug = btn.dataset.slug;
-                const response = await fetch(`/like/${slug}/`, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}",
-                        "X-Requested-With": "XMLHttpRequest"
-                    }
-                });
-                const data = await response.json();
-                btn.querySelector('.like-count').textContent = data.likes;
-            });
-        });
-
-        // Пошукове модальне вікно
-        const searchToggle = document.getElementById('search-toggle');
-        const searchModal = document.getElementById('search-modal');
-        const searchClose = document.getElementById('search-close');
-        const searchInput = document.getElementById('search-input');
-        const searchForm = document.getElementById('search-form');
-
-        // Відкриття пошуку
-        if (searchToggle) {
-            searchToggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                searchModal.classList.remove('hidden');
-                searchInput.focus();
-            });
+                .profile-tab {
+            padding: 15px 20px;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
         }
-
-        // Закриття пошуку
-        if (searchClose) {
-            searchClose.addEventListener('click', () => {
-                searchModal.classList.add('hidden');
-                searchInput.value = '';
-            });
+        .profile-tab.active {
+            border-bottom-color: #1da1f2;
+            color: #1da1f2;
+            background: #f7f9fa;
         }
-
-        // Закриття по кліку на фон
-        if (searchModal) {
-            searchModal.addEventListener('click', (e) => {
-                if (e.target === searchModal) {
-                    searchModal.classList.add('hidden');
-                    searchInput.value = '';
-                }
-            });
+        .profile-tab:hover {
+            background: #f7f9fa;
         }
-
-        // Закриття по Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && searchModal && !searchModal.classList.contains('hidden')) {
-                searchModal.classList.add('hidden');
-                searchInput.value = '';
-            }
-        });
-
-        // Відправка форми по Enter
-        if (searchInput) {
-    searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const searchQuery = searchInput.value.trim();
-            if (searchQuery) {
-                const baseUrl = window.location.origin; // отримуємо http://localhost:8000
-                window.location.href = `${baseUrl}/search/${encodeURIComponent(searchQuery)}/`;
-            }
+        .tab-content {
+            display: none;
         }
-    });
-}
-    });
-</script>
-
-</body>
-</html>
+        .tab-content.active {
+            display: block;
+        }
+        .user-badge {
+            background: linear-gradient(135deg, #1da1f2, #794bc4);
+            color: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0 auto 15px;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1da1f2;
+        }
+        .stat-label {
+            color: #657786;
+            font-size: 14px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #657786;
+        }
+        .comment-badge {
+            background: #f7f9fa;
+            border-left: 4px solid #1da1f2;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .like-badge {
+            background: #fff5f5;
+            border-left: 4px solid #e0245e;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+        }

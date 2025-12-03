@@ -24,7 +24,7 @@
     {% if reply.replies.all %}
     <div class="replies-wrapper">
         {% for r in reply.replies.all %}
-            {% include "_replies.html" with reply=r %}
+            {% include "post_users/_replies.html" with reply=r %}
         {% endfor %}
     </div>
     {% endif %}
