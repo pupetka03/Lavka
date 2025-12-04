@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="uk">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>FX</title>
+		{% load static %}
+		<link rel="stylesheet" href="{% static 'css/main.css' %}" />
+		<link rel="stylesheet" href="{% static 'css/pub.css' %}" />
+		<script src="https://cdn.tailwindcss.com"></script>
+	</head>
+	<body>
+		{% load number_filters %} {% include "nav_bar.html" %}
+
+		<div class="main-content">
+			<!-- Перемикач фідів -->
+			<div class="feed-switcher">
+				<div class="feed-tab active" data-feed="feed1">Lavka</div>
+			</div>
+
+			<!-- Перший фід -->
+			<div id="feed1" class="feed-content active">
+				<main class="max-w-4xl mx-auto px-4 py-8">
+					<div class="publication-wrapper">
+						<div class="post-content">
+							<!-- Заголовок публікації -->
+							<div class="post-header">
+								<div class="post-author-info">
+									<div class="author-avatar">
+										{{ pub.user.username|first|upper }}
+									</div>
+									<div class="author-details">
+										<div class="post-author">{{ pub.title }} <span class="post-handle">@{{ pub.user.username }}</span></div>
+										<div class="post-time">{{ pub.created_at|timesince }} pred</div>
+									</div>
+								</div>
+								<div class="post-actions">
+									<button class="action-btn more-btn">⋯</button>
+								</div>
+							</div>
+
+							<!-- Текст публікації -->
+							<div class="post-text">{{ pub.text }}</div>
+
+							<!-- Теги -->
+							{% if pub.tags.all %}
+							<div class="post-tags">
+								{% for tag in pub.tags.all %}
+								<span class="tag">#{{ tag.name }}</span>
+								{% endfor %}
+							</div>
+							{% endif %}
+
+							<!-- Статистика -->
+							<div class="post-stats">
+								{% if request.user.is_authenticated %}
+								<a href="{% url 'create_comments' pub.slug %}" class="stat-link comment-link">
+									<span class="stat-icon">💬</span>
+									<span class="stat-count">{{ pub.comments.count }}</span>
+								</a>
+								{% else %}
+								<a class="stat-link comment-link">
+									<span class="stat-icon">💬</span>
+									<span class="stat-count">{{ pub.comments.count }}</span>
+								</a>
+								{% endif %}
+
+								<span class="like-button stat-link" data-slug="{{ pub.slug }}">
+									<span class="stat-icon">❤️</span>
+									<span class="like-count stat-count">{{ pub.likes.count }}</span>
+								</span>
+
+								<button class="stat-link share-btn">
+									<span class="stat-icon">↗️</span>
+									<span class="stat-count">Zdieľať</span>
+								</button>
+
+								<div class="like-button stat-link">
+									<a href="{% url 'home_page' %}" class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg transition">
+										← Späť do hlavnej stranke
+									</a>
+								</div>
+							</div>
+						</div>
+
+						<!-- Коментарі -->
+						{% if pub.comments.all %}
+						<div class="comments-container">
+							<div class="comments-header">
+								<h4>Komentare ({{ pub.comments.count }})</h4>
+							</div>
+
+							{% for comment in pub.comments.all %} {% if not comment.parent %}
+							<div class="comment-thread">
+								<div class="comment-section-wrapper">
+									<div class="comment-header">
+										<div class="comment-author-avatar">
+											{{ comment.user.username|first|upper }}
+										</div>
+										<div class="comment-author-info">
+											<span class="comment-author">{{ comment.user.username }}</span>
+											<span class="comment-time">{{ comment.created_at|timesince }} pred</span>
+										</div>
+									</div>
+									<div class="comment-text">{{ comment.text }}</div>
+									<div class="comment-actions">
+										{% if request.user.is_authenticated %}
+										<a href="{% url 'create_reply' pub.slug comment.id %}" class="reply-btn">Odpoveď</a>
+										{% else %}
+										<a class="reply-btn">Odpoveď</a>
+										{% endif %}
+										<button class="comment-like-btn" data-comment-id="{{comment}}">♡ <span class="comment-like-count">{{ comment.likes.count }}</span></button>
+									</div>
+								</div>
+
+								{% for reply in comment.replies.all %} {% include "post_users/_replies.html" with reply=reply %} {% endfor %}
+							</div>
+							{% endif %} {% endfor %}
+						</div>
+						{% endif %}
+					</div>
+				</main>
+			</div>
+		</div>
+
+		<div class="sidebar-right">
+			<div class="trends-block">
+				<h3>Trendy tags</h3>
+				{% for tag in tags %}
+				<div class="trend-item">
+					<div class="trend-name">{{ tag.name }}</div>
+					<div class="trend-category">{{ tag.usage_count|humanize_k }} твітів</div>
+				</div>
+				{% endfor %}
+			</div>
+		</div>
+
+		<!-- Модальне вікно пошуку -->
+		<div id="search-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+			<div class="flex items-center justify-center min-h-screen p-4">
+				<div class="bg-white rounded-2xl w-full max-w-md mx-auto">
+					<!-- Заголовок -->
+					<div class="flex items-center justify-between p-4 border-b">
+						<h3 class="text-lg font-bold">Hľadať</h3>
+						<button id="search-close" class="text-gray-500 hover:text-gray-700 text-2xl">
+							×
+						</button>
+					</div>
+
+					<!-- Поле пошуку -->
+					<div class="p-4">
+						<input
+							type="text"
+							id="search-input"
+							placeholder="Zadajte vyhľadávací dopyt..."
+							class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						/>
+					</div>
+
+					<!-- Підвал -->
+					<div class="p-4 border-t text-sm text-gray-500">
+						Stlačením klávesu Enter spustíte vyhľadávanie
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			document.addEventListener("DOMContentLoaded", () => {
+			    // Обробка лайків для публікацій
+			    document.querySelectorAll('.like-button').forEach(btn => {
+			        btn.addEventListener('click', async () => {
+			            const slug = btn.dataset.slug;
+			            const icon = btn.querySelector('.stat-icon');
+
+			            // Анімація
+			            icon.classList.add('liked');
+			            setTimeout(() => icon.classList.remove('liked'), 400);
+
+			            const response = await fetch(`/like/${slug}/`, {
+			                method: "POST",
+			                headers: {
+			                    "X-CSRFToken": "{{ csrf_token }}",
+			                    "X-Requested-With": "XMLHttpRequest"
+			                }
+			            });
+			            const data = await response.json();
+			            btn.querySelector('.like-count').textContent = data.likes;
+			        });
+			    });
+
+			    // Обробка лайків для коментарів
+			    document.querySelectorAll('.comment-like-btn, .reply-like-btn').forEach(btn => {
+			        btn.addEventListener('click', async () => {
+			            const commentId = btn.dataset.commentId;
+			            const icon = btn.querySelector('span:first-child');
+
+			            // Анімація
+			            icon.classList.add('liked');
+			            setTimeout(() => icon.classList.remove('liked'), 400);
+
+			            console.log('Like comment:', commentId);
+			        });
+			    });
+
+			    // Обробка кнопки "Поділитися"
+			    document.querySelectorAll('.share-btn').forEach(btn => {
+			        btn.addEventListener('click', () => {
+			            console.log('Share publication');
+			        });
+			    });
+
+			    // Обробка кнопки "Більше"
+			    document.querySelectorAll('.more-btn').forEach(btn => {
+			        btn.addEventListener('click', (e) => {
+			            console.log('More options');
+			            e.stopPropagation();
+			        });
+			    });
+			});
+		</script>
+	</body>
+</html>

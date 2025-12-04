@@ -1,0 +1,8 @@
+asgiref==3.10.0
+Django==5.2.7
+django-ratelimit==4.1.0
+pytils==0.4.4
+pytz==2025.2
+RapidFuzz==3.14.3
+sqlparse==0.5.3
+typing_extensions==4.15.0

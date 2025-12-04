@@ -28,7 +28,11 @@ DEBUG = True
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret')  # fallback для локалки
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ["localhost", "192.168.0.212", "147.175.113.199"]
+ALLOWED_HOSTS = ["localhost", "192.168.0.212", "147.175.113.158", "ca6b72496f0c.ngrok-free.app"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://ca6b72496f0c.ngrok-free.app",
+]
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -121,6 +125,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
