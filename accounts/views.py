@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from .recsys import get_feed_for_user, get_popular_feed, tegs_feed_popular, get_random_feed_for_user
 from rapidfuzz import process
 from django_ratelimit.decorators import ratelimit
+from .utils import paginator
 
 
 
@@ -80,6 +81,8 @@ def home_page(request):
         }
         return render(request, "feed/home_page.html", context=context)
     
+
+    
     
     #якщо залогінений
     publication = get_feed_for_user(request.user)
@@ -90,15 +93,34 @@ def home_page(request):
     tags = Tag.objects.filter(name__in=tag_info)
 
     #другий фід
-    explore_publications =  get_random_feed_for_user(request.user)
-
+    explore_publications = get_random_feed_for_user(request.user)
+    
 
     #liked_posts_ids = set(Like.objects.filter(user=request.user).values_list('publication_id', flat=True))
     #publication = [p for p in publication if p.id not in liked_posts_ids]
 
     
+    page_feed = int(request.GET.get("page_feed", 0))
+    page_explore = int(request.GET.get("page_explore", 0))
 
-    return render(request, "feed/home_page.html", {"publication":publication, "explore_publications":explore_publications, "likes":likes, "tags":tags})
+    page_publications = paginator(publication, page_feed, 10)
+    page_explores = paginator(explore_publications, page_explore, 10)
+
+
+    context = {
+        "publication":page_publications,
+        "explore_publications":page_explores,
+        "likes":likes, "tags":tags,
+        "page_feed":page_feed,
+        "page_explore":page_explore,
+
+        }
+    return render(request, "feed/home_page.html", context=context)
+
+def create_post_page(request):
+    tag_info = list(tegs_feed_popular())
+    tags = Tag.objects.filter(name__in=tag_info)
+    return render(request, "post_users/create_post_page.html", {"tags": tags})
 
 
 @ratelimit(key='ip', rate='2/m', method='POST', block=True)
@@ -166,18 +188,28 @@ def create_comments(request, slug, parent=None):
 
 def open_publication(request, slug):
     pub = get_object_or_404(Publication, slug=slug)
-    return render(request, "post_users/pub.html", {"pub":pub})
+    tag_info = list(tegs_feed_popular())
+    tags = Tag.objects.filter(name__in=tag_info)
+
+    return render(request, "post_users/pub.html", {"pub":pub, "tags":tags})
 
 def profile(request, username):
     profile_user = get_object_or_404(User, username=username)
     publications = Publication.objects.filter(user=profile_user).order_by('-id')
     likes_publication = Like.objects.filter(user=profile_user).order_by('-created_at')
     coments_user = Comments.objects.filter(user=profile_user).order_by('-created_at')
+
+    tag_info = list(tegs_feed_popular())
+    tags = Tag.objects.filter(name__in=tag_info)
+
+    
+ 
     return render(request, 'auth/profile.html', {
         'profile_user': profile_user,
         'publications': publications,
         'likes_publication': likes_publication,
         'coments_user':coments_user,
+        'tags':tags,
     })
 
 def search(request, search):
@@ -194,6 +226,9 @@ def search(request, search):
 
     
     return render(request, "feed/result_of_search.html", {"posts":posts, "tags":tags})
+
+
+
 
 
 
