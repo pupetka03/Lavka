@@ -16,13 +16,20 @@
         <button class="reply-like-btn" data-comment-id="{{ reply.id }}">
             ♡ <span class="reply-like-count">{{ reply.likes.count }}</span>
         </button>
-    <button class="reply-reply-btn" data-comment-id="{{ reply.id }}" onclick="window.location.href='{% url 'create_reply' pub.slug reply.id %}'">
+    <!-- <button class="reply-reply-btn" data-comment-id="{{ reply.id }}" onclick="window.location.href='{% url 'create_reply' pub.slug reply.id %}'">
         💬 Odpoved
-    </button>
+    </button> -->
+
+    <a class="stat-link comment-link comments-toggle-btn-origin reply-btn"
+   		data-slug="{{ pub.slug }}"
+   		data-parent="{{ reply.id }}">
+    		Odpoveď
+	</a>
+
     </div>
 
     {% if reply.replies.all %}
-    <div class="replies-wrapper">
+    <div class="comment-author-info">
         {% for r in reply.replies.all %}
             {% include "post_users/_replies.html" with reply=r %}
         {% endfor %}

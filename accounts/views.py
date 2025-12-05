@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import User, Publication, Like, Comments, Tag
 from django.contrib import messages
+from django.views.decorators.http import require_POST
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import CreatePublicationForm, CreateCommentsForms
@@ -10,6 +11,7 @@ from rapidfuzz import process
 from django_ratelimit.decorators import ratelimit
 from .utils import paginator
 import json
+
 
 
 
@@ -166,18 +168,17 @@ def like_publication(request, slug):
 @login_required
 #@ratelimit(key='ip', rate='2/m', method='POST', block=True)
 def create_comments(request, slug, parent=None):
+    print(slug, parent)
     if request.method == "POST":
         pub = Publication.objects.get(slug=slug)
         form = CreateCommentsForms(request.POST)
 
-        data = json.loads(request.body)
-        text = data.get('text', '').strip()
+
 
         if form.is_valid():
             obj = form.save(commit = False)
             obj.user = request.user
             obj.publication = pub
-            obj.text = text
             if parent:
                 par = Comments.objects.get(id=parent)
                 obj.parent = par
@@ -191,21 +192,44 @@ def create_comments(request, slug, parent=None):
         form = CreateCommentsForms()
 
     return render(request, "post_users/create_c.html", {"form":form})
-
 """""
 
 
+@require_POST
 @login_required
-#@ratelimit(key='ip', rate='2/m', method='POST', block=True)
+@ratelimit(key='ip', rate='2/m', method='POST', block=True)
 def create_comments(request, slug, parent=None):
-    data = json.loads(request.body)
+    # 1. Захист: Обробка JSON та помилки
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest("JSON ^^.")
+        
     text = data.get('text', '').strip()
+    
+    if not text:
+        return HttpResponseBadRequest("???")
 
-    print(slug, text, parent )
+    publication = get_object_or_404(Publication, slug=slug)
 
-    publication = Publication.objects.get(slug=slug)
+    parent_comment = None
+    if parent:
+        try:
+            parent_comment = Comments.objects.get(id=parent, publication=publication)
+        except Comments.DoesNotExist:
+            return HttpResponseBadRequest("???")
 
-    return redirect("home_page")
+    Comments.objects.create(
+        publication=publication,
+        user=request.user,
+        text=text,
+        parent=parent_comment
+    )
+
+    #return redirect("home_page") 
+
+    return JsonResponse({"status": "success", "message": "Spravne"})
+
 
 
 def open_publication(request, slug):

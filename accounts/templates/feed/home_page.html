@@ -7,10 +7,16 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/main.css' %}" />
     <script src="https://cdn.tailwindcss.com"></script>
+<head>
+    {% load static %}
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <script src="{% static 'js/push_comments.js' %}"></script>
+</head>
 </head>
 <body>
     {% load number_filters %} 
     {% include "nav_bar.html" %}
+    {% include "feed/modal_parts/comments_window_push.html" %}
 
     <div class="main-content">
         <!-- Перемикач фідів -->
@@ -49,7 +55,7 @@
                     <div class="post-stats">
                         {% if request.user.is_authenticated %}
                             <!-- Додаємо клас, а не id, бо буде багато таких кнопок -->
-                            <button type="button" class="comments-toggle-btn" data-slug="{{ pub.slug }}">
+                            <button type="button" class="comments-toggle-btn-origin" data-slug="{{ pub.slug }}">
                                 💬 {{ pub.comments.count }}
                             </button>
                         {% else %}
@@ -91,7 +97,7 @@
             <!-- Пагінація -->
             <div class="pagination">
                 {% if page_feed > 0 %}
-                <form method="get" style="flex: 1;">
+                <form method="get" style="flex: 3;">
                     <input type="hidden" name="page_feed" value="{{ page_feed|add:'-1' }}" />
                     <input type="hidden" name="active_feed" value="feed1" />
                     <button type="submit" class="post-button" style="width: 100%; margin-top: 0;">
@@ -100,7 +106,7 @@
                 </form>
                 {% endif %}
 
-                <form method="get" style="flex: 1;">
+                <form method="get" style="flex: 3;">
                     <input type="hidden" name="page_feed" value="{{ page_feed|add:'1' }}" />
                     <input type="hidden" name="active_feed" value="feed1" />
                     <button type="submit" class="post-button" style="width: 100%; margin-top: 0;">
@@ -137,7 +143,7 @@
                     
                     <div class="post-stats">
                         {% if request.user.is_authenticated %}
-                            <button type="button" class="comments-toggle-btn" data-slug="{{ pub.slug }}">
+                            <button type="button" class="comments-toggle-btn-origin" data-slug="{{ pub.slug }}">
                                 💬 {{ pub.comments.count }}
                             </button>
                         {% else %}
@@ -236,42 +242,6 @@
         </div>
     </div>
 
-    <!-- Модальне вікно коментаря (одне для всіх публікацій) -->
-    <div id="comment-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-2xl w-full max-w-md mx-auto">
-                <div class="flex items-center justify-between p-4 border-b">
-                    <h3 id="comment-modal-title" class="text-lg font-bold">Pridať komentár</h3>
-                    <button id="comment-modal-close" class="text-gray-500 hover:text-gray-700 text-2xl">
-                        ×
-                    </button>
-                </div>
-                <div class="p-4">
-                    <!-- Форма для коментаря -->
-                    <form id="comment-form" method="POST">
-                        {% csrf_token %}
-                        <input type="hidden" id="comment-publication-slug" name="slug" />
-                        <textarea
-                            id="comment-text"
-                            name="text"
-                            placeholder="Napíšte svoj komentár..."
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            rows="4"
-                            required
-                        ></textarea>
-                        <div class="mt-4 flex justify-end gap-2">
-                            <button type="button" id="comment-cancel" class="px-4 py-2 text-gray-600 hover:text-gray-800">
-                                Zrušiť
-                            </button>
-                            <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                                Odoslať
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -367,99 +337,6 @@
                             const baseUrl = window.location.origin;
                             window.location.href = `${baseUrl}/search/${encodeURIComponent(searchQuery)}/`;
                         }
-                    }
-                });
-            }
-
-            // --- КОМЕНТАРІ (НОВИЙ КОД) ---
-            const commentModal = document.getElementById('comment-modal');
-            const commentModalClose = document.getElementById('comment-modal-close');
-            const commentCancel = document.getElementById('comment-cancel');
-            const commentForm = document.getElementById('comment-form');
-            const commentPublicationSlug = document.getElementById('comment-publication-slug');
-            const commentText = document.getElementById('comment-text');
-
-            // Відкриття модалки для коментаря
-            document.querySelectorAll('.comments-toggle-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const slug = btn.dataset.slug;
-                    
-                    // Записуємо slug публікації у приховане поле
-                    commentPublicationSlug.value = slug;
-                    
-                    // Очищаємо текст коментаря
-                    commentText.value = '';
-                    
-                    // Показуємо модалку
-                    commentModal.classList.remove('hidden');
-                    commentText.focus();
-                });
-            });
-
-            // Закриття модалки коментаря
-            if (commentModalClose) {
-                commentModalClose.addEventListener('click', () => {
-                    commentModal.classList.add('hidden');
-                    commentText.value = '';
-                });
-            }
-
-            if (commentCancel) {
-                commentCancel.addEventListener('click', () => {
-                    commentModal.classList.add('hidden');
-                    commentText.value = '';
-                });
-            }
-
-            if (commentModal) {
-                commentModal.addEventListener('click', (e) => {
-                    if (e.target === commentModal) {
-                        commentModal.classList.add('hidden');
-                        commentText.value = '';
-                    }
-                });
-            }
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && commentModal && !commentModal.classList.contains('hidden')) {
-                    commentModal.classList.add('hidden');
-                    commentText.value = '';
-                }
-            });
-
-            // Відправка форми коментаря (AJAX)
-            if (commentForm) {
-                commentForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    const slug = commentPublicationSlug.value;
-                    const text = commentText.value.trim();
-                    
-                    if (!text) {
-                        alert('Prosím, napíšte komentár!');
-                        return;
-                    }
-                    
-                    try {
-                        const response = await fetch(`/create_c/${slug}/`, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-CSRFToken": "{{ csrf_token }}"
-                            },
-                            body: JSON.stringify({ text: text })
-                        });
-                        
-                        if (response.ok) {
-                            // Оновлюємо сторінку після успішного додавання коментаря
-                            window.location.reload();
-                        } else {
-                            alert('Chyba pri pridávaní komentára.');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('Chyba pri pridávaní komentára.');
                     }
                 });
             }
