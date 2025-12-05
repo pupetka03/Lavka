@@ -9,6 +9,7 @@ from .recsys import get_feed_for_user, get_popular_feed, tegs_feed_popular, get_
 from rapidfuzz import process
 from django_ratelimit.decorators import ratelimit
 from .utils import paginator
+import json
 
 
 
@@ -161,17 +162,22 @@ def like_publication(request, slug):
     likes_count = pub.likes.count()
     return JsonResponse({"likes": likes_count})
 
+"""""
 @login_required
-@ratelimit(key='ip', rate='2/m', method='POST', block=True)
+#@ratelimit(key='ip', rate='2/m', method='POST', block=True)
 def create_comments(request, slug, parent=None):
     if request.method == "POST":
         pub = Publication.objects.get(slug=slug)
         form = CreateCommentsForms(request.POST)
 
+        data = json.loads(request.body)
+        text = data.get('text', '').strip()
+
         if form.is_valid():
             obj = form.save(commit = False)
             obj.user = request.user
             obj.publication = pub
+            obj.text = text
             if parent:
                 par = Comments.objects.get(id=parent)
                 obj.parent = par
@@ -185,6 +191,22 @@ def create_comments(request, slug, parent=None):
         form = CreateCommentsForms()
 
     return render(request, "post_users/create_c.html", {"form":form})
+
+"""""
+
+
+@login_required
+#@ratelimit(key='ip', rate='2/m', method='POST', block=True)
+def create_comments(request, slug, parent=None):
+    data = json.loads(request.body)
+    text = data.get('text', '').strip()
+
+    print(slug, text, parent )
+
+    publication = Publication.objects.get(slug=slug)
+
+    return redirect("home_page")
+
 
 def open_publication(request, slug):
     pub = get_object_or_404(Publication, slug=slug)
