@@ -7,6 +7,12 @@
 		{% load static %}
 		<link rel="stylesheet" href="{% static 'css/main.css' %}" />
 		<link rel="stylesheet" href="{% static 'css/pub.css' %}" />
+		{%include "feed/modal_parts/comments_window_push.html"%}
+		<head>
+    		{% load static %}
+    		<meta name="csrf-token" content="{{ csrf_token }}">
+			<script src="{% static 'js/push_comments.js' %}"></script>
+		</head>
 		<script src="https://cdn.tailwindcss.com"></script>
 	</head>
 	<body>
@@ -54,9 +60,10 @@
 							<!-- Статистика -->
 							<div class="post-stats">
 								{% if request.user.is_authenticated %}
-								<a href="{% url 'create_comments' pub.slug %}" class="stat-link comment-link">
-									<span class="stat-icon">💬</span>
-									<span class="stat-count">{{ pub.comments.count }}</span>
+
+								<a class="stat-link comment-link comments-toggle-btn-origin" data-slug="{{ pub.slug }}">
+    								<span class="stat-icon">💬</span>
+    								<span class="stat-count">{{ pub.comments.count }}</span>
 								</a>
 								{% else %}
 								<a class="stat-link comment-link">
@@ -105,7 +112,12 @@
 									<div class="comment-text">{{ comment.text }}</div>
 									<div class="comment-actions">
 										{% if request.user.is_authenticated %}
-										<a href="{% url 'create_reply' pub.slug comment.id %}" class="reply-btn">Odpoveď</a>
+										<!-- <a href="{% url 'create_reply' pub.slug comment.id %}" class="reply-btn">Odpoveď</a> -->
+										<a class="stat-link comment-link comments-toggle-btn-origin reply-btn"
+   											data-slug="{{ pub.slug }}"
+   											data-parent="{{ comment.id }}">
+    											Odpoveď
+										</a>
 										{% else %}
 										<a class="reply-btn">Odpoveď</a>
 										{% endif %}
@@ -129,7 +141,7 @@
 				{% for tag in tags %}
 				<div class="trend-item">
 					<div class="trend-name">{{ tag.name }}</div>
-					<div class="trend-category">{{ tag.usage_count|humanize_k }} твітів</div>
+					<div class="trend-category">{{ tag.usage_count|humanize_k }} publikácií</div>
 				</div>
 				{% endfor %}
 			</div>

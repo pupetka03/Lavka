@@ -54,21 +54,6 @@
 
 <script>
 	    document.addEventListener("DOMContentLoaded", () => {
-	        // Обробка перемикача фідів
-	        document.querySelectorAll('.feed-tab').forEach(tab => {
-	            tab.addEventListener('click', () => {
-	                document.querySelectorAll('.feed-tab').forEach(t => {
-	                    t.classList.remove('active');
-	                });
-	                tab.classList.add('active');
-
-	                document.querySelectorAll('.feed-content').forEach(content => {
-	                    content.classList.remove('active');
-	                });
-	                const feedId = tab.getAttribute('data-feed');
-	                document.getElementById(feedId).classList.add('active');
-	            });
-	        });
 
 
 
