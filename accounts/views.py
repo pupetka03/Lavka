@@ -6,11 +6,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import CreatePublicationForm, CreateCommentsForms
 from django.http import JsonResponse
-from .recsys import get_feed_for_user, get_popular_feed, tegs_feed_popular, get_random_feed_for_user
+from .recsys import get_feed_for_user, get_popular_feed, tegs_feed_popular, get_exploration_feed_for_user
 from rapidfuzz import process
 from django_ratelimit.decorators import ratelimit
 from .utils import paginator
 import json
+from django.views.decorators.cache import cache_page
 
 
 
@@ -68,7 +69,7 @@ def out(request):
 
 
 # ====== For User Interaction ==========
-
+#@cache_page(60)
 def home_page(request):
     #інфа якщо користувач не залогінений
     if not request.user.is_authenticated:
@@ -96,12 +97,7 @@ def home_page(request):
     tags = Tag.objects.filter(name__in=tag_info)
 
     #другий фід
-    explore_publications = get_random_feed_for_user(request.user)
-    
-
-    #liked_posts_ids = set(Like.objects.filter(user=request.user).values_list('publication_id', flat=True))
-    #publication = [p for p in publication if p.id not in liked_posts_ids]
-
+    explore_publications = get_exploration_feed_for_user(request.user)
     
     page_feed = int(request.GET.get("page_feed", 0))
     page_explore = int(request.GET.get("page_explore", 0))
@@ -131,8 +127,6 @@ def create_publication(request):
     if request.user.is_authenticated:
 
         if request.method == "POST":
-            tags_all = Tag.objects.all()
-
             title = request.POST.get("title")
             text = request.POST.get("text")
 
@@ -148,8 +142,6 @@ def create_publication(request):
                     obj.save()
                     pub.tags.add(obj)
             
-
-
         return redirect("home_page")
     
     else:
@@ -164,42 +156,11 @@ def like_publication(request, slug):
     likes_count = pub.likes.count()
     return JsonResponse({"likes": likes_count})
 
-"""""
-@login_required
-#@ratelimit(key='ip', rate='2/m', method='POST', block=True)
-def create_comments(request, slug, parent=None):
-    print(slug, parent)
-    if request.method == "POST":
-        pub = Publication.objects.get(slug=slug)
-        form = CreateCommentsForms(request.POST)
-
-
-
-        if form.is_valid():
-            obj = form.save(commit = False)
-            obj.user = request.user
-            obj.publication = pub
-            if parent:
-                par = Comments.objects.get(id=parent)
-                obj.parent = par
-                obj.save()
-            else:
-                obj.save()
-
-        return redirect('pub', slug=pub.slug)
-
-    else:
-        form = CreateCommentsForms()
-
-    return render(request, "post_users/create_c.html", {"form":form})
-"""""
-
 
 @require_POST
 @login_required
 @ratelimit(key='ip', rate='2/m', method='POST', block=True)
 def create_comments(request, slug, parent=None):
-    # 1. Захист: Обробка JSON та помилки
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
@@ -225,8 +186,6 @@ def create_comments(request, slug, parent=None):
         text=text,
         parent=parent_comment
     )
-
-    #return redirect("home_page") 
 
     return JsonResponse({"status": "success", "message": "Spravne"})
 
@@ -258,21 +217,33 @@ def profile(request, username):
         'tags':tags,
     })
 
-def search(request, search):
-    tags = list(Tag.objects.values_list('name', flat=True))
-    best_match = process.extractOne(search, tags)
 
+def search(request, search):
+    pub_queryset = Publication.objects.order_by("created_at")
+    pub_dict = {pub.text: pub for pub in pub_queryset}
+    pub_texts = list(pub_dict.keys())
+    
+    all_matches = process.extract(search, pub_texts, limit=None)
+    
+    SIMILARITY_THRESHOLD = 56
+    
+    filtered_matches = [
+        (text, score) for text, score, _ in all_matches 
+        if score >= SIMILARITY_THRESHOLD
+    ]
+    filtered_matches.sort(key=lambda x: x[1], reverse=True)
+ 
+    matched_texts = [match[0] for match in filtered_matches]
+    posts = [pub_dict[text] for text in matched_texts if text in pub_dict]
+    
+    # Теги
     tag_info = list(tegs_feed_popular())
     tags = Tag.objects.filter(name__in=tag_info)
-
-    if best_match:
-        tags_pub = Tag.objects.get(name=best_match[0])
-        posts = Publication.objects.filter(tags=tags_pub)
-        
-
     
-    return render(request, "feed/result_of_search.html", {"posts":posts, "tags":tags})
-
+    return render(request, "feed/result_of_search.html", {
+        "posts": posts, 
+        "tags": tags
+    })
 
 
 

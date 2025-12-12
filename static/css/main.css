@@ -198,6 +198,191 @@ body {
             background-color: #0c85d0;
         }
 
+.pag-button {
+    background: linear-gradient(135deg, #1da1f2 0%, #0d8bd9 100%);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 9999px;
+    font-weight: 700;
+    cursor: pointer;
+    float: right;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 14px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    box-shadow: 0 4px 12px rgba(29, 161, 242, 0.3);
+    letter-spacing: 0.3px;
+    min-width: 120px;
+    text-transform: uppercase;
+}
+
+.pag-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent);
+    transition: left 0.6s ease;
+    z-index: 1;
+}
+
+
+
+.pag-button:hover::before {
+    left: 100%;
+}
+
+.pag-button:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 8px rgba(29, 161, 242, 0.3);
+    transition: all 0.1s ease;
+}
+
+.pag-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.4), 
+                0 4px 12px rgba(29, 161, 242, 0.3);
+}
+
+/* Варіант з іконкою */
+.pag-button.pag-button--with-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px 10px 16px;
+}
+
+.pag-button__icon {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+}
+
+.pag-button:hover .pag-button__icon {
+    transform: translateX(3px);
+}
+
+/* Disabled state */
+.pag-button:disabled {
+    background: linear-gradient(135deg, #cccccc 0%, #aaaaaa 100%);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pag-button:disabled:hover {
+    background: linear-gradient(135deg, #cccccc 0%, #aaaaaa 100%);
+    transform: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pag-button:disabled::before {
+    display: none;
+}
+
+/* Loading state */
+.pag-button.pag-button--loading {
+    position: relative;
+    color: transparent;
+}
+
+.pag-button.pag-button--loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: button-spinner 0.8s linear infinite;
+}
+
+@keyframes button-spinner {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Різні варіанти кольорів */
+.pag-button.pag-button--success {
+    background: linear-gradient(135deg, #00c851 0%, #007e33 100%);
+    box-shadow: 0 4px 12px rgba(0, 200, 81, 0.3);
+}
+
+.pag-button.pag-button--success:hover {
+    background: linear-gradient(135deg, #00a843 0%, #006527 100%);
+    box-shadow: 0 6px 20px rgba(0, 200, 81, 0.4);
+}
+
+.pag-button.pag-button--warning {
+    background: linear-gradient(135deg, #ffbb33 0%, #ff8800 100%);
+    box-shadow: 0 4px 12px rgba(255, 187, 51, 0.3);
+}
+
+.pag-button.pag-button--warning:hover {
+    background: linear-gradient(135deg, #e6a830 0%, #e67a00 100%);
+    box-shadow: 0 6px 20px rgba(255, 187, 51, 0.4);
+}
+
+.pag-button.pag-button--danger {
+    background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+    box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
+}
+
+.pag-button.pag-button--danger:hover {
+    background: linear-gradient(135deg, #e63e3e 0%, #b30000 100%);
+    box-shadow: 0 6px 20px rgba(255, 68, 68, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pag-button {
+        padding: 12px 28px;
+        font-size: 15px;
+        min-width: 140px;
+        float: none;
+        width: 100%;
+        max-width: 300px;
+        display: block;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .pag-button {
+        padding: 10px 22px;
+        font-size: 14px;
+        min-width: 120px;
+    }
+}
+
+/* Анімація появи */
+@keyframes button-appear {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.pag-button {
+    animation: button-appear 0.4s ease-out;
+}
+
         .publication-wrapper {
             padding: 12px 15px;
             border-bottom: 1px solid #ebeef0;
@@ -320,6 +505,7 @@ body {
             font-size: 15px;
             color: #1a1a1a;
         }
+        
 
         /* Адаптивність для мобільних пристроїв */
         @media (max-width: 768px) {
@@ -432,4 +618,5 @@ body {
 
 
 
+        
         

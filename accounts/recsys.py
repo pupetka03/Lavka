@@ -13,7 +13,10 @@ from random import shuffle
 
 
 #this is recomendation systems only for publication
-TIME_LIMIT = timezone.now() - timedelta(days=100)
+#TIME_LIMIT = timezone.now() - timedelta(days=100)
+
+def get_time_limit(days=1):
+    return timezone.now() - timedelta(days=days)
 
 
 
@@ -47,7 +50,10 @@ def get_feed_for_user(user):
         Q(tags__in=tags) |
         Q(id__in=popular_posts.values('id')) |
         Q(id__in=[p.id for p in fresh_post]),
-        created_at__gte=TIME_LIMIT
+        created_at__gte=get_time_limit()
+    ).annotate(
+        likes_count=Count('likes'),
+        comments_count=Count('comments')
     ).distinct()
 
     candidates = list(candidates)
@@ -58,7 +64,6 @@ def get_feed_for_user(user):
 
     # ========== Ранжування ===========
 
-    # Готуємо нормалізацію
     max_likes = max((p.likes.count() for p in candidates), default=1)
     if max_likes == 0:
         max_likes = 1
@@ -69,18 +74,18 @@ def get_feed_for_user(user):
     def score_post(post):
         score = 0
 
-        # Автор знайомий → сильний сигнал
+        #Співпадіння авторів
         if post.user in authors:
             score += 2
 
-        # Співпадіння тегів → середній сигнал
+        # Співпадіння тегів
         score += post.tags.filter(id__in=[t.id for t in tags]).count()
 
-        # Популярність нормована → легкий бонус
+        # Популярність (бонус)
         score += 0.3 * (post.likes.count() / max_likes)
         score += 0.5 * (post.comments.count() / max_comments)
 
-        # Новизна → посилюємо свіжі пости
+        # Новизна (бонус)
         age_seconds = (timezone.now() - post.created_at).total_seconds()
         freshness = max(0, 1 - age_seconds / (60 * 60 * 24))  # за добу згасає
         score += 0.5 * freshness
@@ -91,7 +96,7 @@ def get_feed_for_user(user):
     # Рахуємо оцінки та сортуємо
     candidates = sorted(candidates, key=score_post, reverse=True)
     
-    # ---- Підмішування популярних (щоб фід був живим) ----
+    #підмішування популярних публікацій 
     popular_list = list(popular_posts)
     
 
@@ -106,23 +111,18 @@ def get_feed_for_user(user):
             if p not in candidates:
                 candidates.insert(i, p)
                 i += step
-    #vidlatka(authors, tags, popular_posts)
-    debug_feed(candidates, score_post)
     return candidates
 
 
 
-def get_popular_feed():
-    qs = (
+def get_popular_feed(limit=10):
+    return (
         Publication.objects
-        .filter(created_at__gte=TIME_LIMIT)
+        .filter(created_at__gte=get_time_limit())
         .annotate(likes_count=Count('likes'))
         .order_by('-likes_count')
+        [:limit]
     )
-
-    total = qs.count()
-    keep = max(5, total // 2)
-    return qs[:keep]
 
 
 
@@ -133,63 +133,93 @@ def get_random_fresh_posts():
 
 
 
-def tegs_feed_popular():
+def tegs_feed_popular(max_tags=3):
+    popular_pub = get_popular_feed().prefetch_related('tags')
 
-    popular_pub = get_popular_feed()
-    tags = set()
-
+    tag_counts = {}
     for pub in popular_pub:
         for tag in pub.tags.all():
-            if len(tags) >= 3:
-                break
-            tags.add(tag.name)
+            tag_counts[tag.name] = tag_counts.get(tag.name, 0) + 1
 
-    return tags
+    sorted_tags = sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)
+
+    return [tag for tag, count in sorted_tags[:max_tags]]
 
 
 
-def get_random_feed_for_user(user):
-    # ======= Збір інфи ==========
+def get_exploration_feed_for_user(user):
+    # ======= Збір інфи про юзера ==========
     authors = set()
     tags = set()
 
-    user_liked_author_posts = Like.objects.filter(user=user)
+    # Оптимізація: prefetch щоб уникнути N+1
+    user_liked_author_posts = (
+        Like.objects
+        .filter(user=user)
+        .select_related('publication__user')
+        .prefetch_related('publication__tags')
+    )
 
     for like in user_liked_author_posts:
         authors.add(like.publication.user)
         for tag in like.publication.tags.all():
             tags.add(tag)
 
-
-    candidates = Publication.objects.filter(created_at__gte=TIME_LIMIT)
+    # Всі пости за останній період з аннотаціями
+    candidates = (
+        Publication.objects
+        .filter(created_at__gte=get_time_limit())
+        .annotate(
+            likes_count=Count('likes'),
+            comments_count=Count('comments')
+        )
+    )
+    
+    # Отримуємо ID постів які юзер вже лайкнув
+    user_liked_post_ids = set(
+        Like.objects
+        .filter(user=user)
+        .values_list('publication_id', flat=True)
+    )
+    
     candidates = list(candidates)
 
-    
-    #======== Ранжування =========
-    max_likes = max((p.likes.count() for p in candidates), default=1)
-    max_comments = max((Comments.objects.filter(publication=pub1).count() for pub1 in candidates), default=1)
+    # ======== Ранжування =========
+    max_likes = max((p.likes_count for p in candidates), default=1)
+    max_comments = max((p.comments_count for p in candidates), default=1)
 
     if max_comments == 0:
         max_comments = 1
     if max_likes == 0:
         max_likes = 1
 
+    now = timezone.now()  # Рахуємо один раз
+
     def score_post(post):
         score = 0
 
+        # бінус бав для знайомих авторів
         if post.user in authors:
-            score -= 1
+            score -= 1.5
 
-        if Like.objects.filter(publication=post).exists():
-            score -= 2
+        # мінус баф пости які юзер вже лайкнув
+        if post.id in user_liked_post_ids:
+            score -= 3  # Сильна кара
 
-        age_seconds = (timezone.now() - post.created_at).total_seconds()
-        freshness = max(0, 1 - age_seconds / (60 * 60 * 24))  # за добу згасає
-        score += 1 * freshness
+        # ЗАОХОЧУЄ свіжі пости 
+        age_seconds = (now - post.created_at).total_seconds()
+        freshness = max(0, 1 - age_seconds / (60 * 60 * 24))
+        score += 1.5 * freshness  # Збільшив вагу свіжості
 
-        score += 0.3 * (post.likes.count() / max_likes)
-        score += 0.5 * (post.comments.count() / max_comments)
+        # Легкий бонус за популярність
+        score += 0.2 * (post.likes_count / max_likes)
+        score += 0.3 * (post.comments_count / max_comments)
 
+        # баф якщо пост від автора з тегами юзера (але не сам автор)
+        if post.user not in authors:
+            matching_tags = post.tags.filter(id__in=[t.id for t in tags]).count()
+            if matching_tags > 0:
+                score += 0.5 * matching_tags  # Схожі інтереси, але новий автор
 
         return score
 
@@ -200,17 +230,17 @@ def get_random_feed_for_user(user):
 
 
 
-# лише для тесту
+# лише для тесту (відкладка)
 def vidlatka(authors, tags, popular_posts):
         
     author_posts = Publication.objects.filter(
         user__in=authors,
-        created_at__gte = TIME_LIMIT
+        created_at__gte = get_time_limit()
     )
 
     tag_posts = Publication.objects.filter(
         tags__in=tags,
-        created_at__gte=TIME_LIMIT
+        created_at__gte=get_time_limit()
     )
 
     with open("file.txt", "w", encoding="utf-8") as f:

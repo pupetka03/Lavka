@@ -1,62 +1,465 @@
-        .profile-tab {
-            padding: 15px 20px;
-            border-bottom: 3px solid transparent;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-        .profile-tab.active {
-            border-bottom-color: #1da1f2;
-            color: #1da1f2;
-            background: #f7f9fa;
-        }
-        .profile-tab:hover {
-            background: #f7f9fa;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .user-badge {
-            background: linear-gradient(135deg, #1da1f2, #794bc4);
-            color: white;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: bold;
-            margin: 0 auto 15px;
-        }
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #1da1f2;
-        }
-        .stat-label {
-            color: #657786;
-            font-size: 14px;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #657786;
-        }
-        .comment-badge {
-            background: #f7f9fa;
-            border-left: 4px solid #1da1f2;
-            padding: 12px 15px;
-            margin: 10px 0;
-            border-radius: 0 8px 8px 0;
-        }
-        .like-badge {
-            background: #fff5f5;
-            border-left: 4px solid #e0245e;
-            padding: 12px 15px;
-            margin: 10px 0;
-            border-radius: 0 8px 8px 0;
-        }
+/* Стилі профілю з сучасним дизайн-системою */
+
+:root {
+  --profile-primary: #1da1f2;
+  --profile-primary-gradient: linear-gradient(135deg, #1da1f2 0%, #794bc4 100%);
+  --profile-bg: rgba(255, 255, 255, 0.85);
+  --profile-bg-hover: rgba(29, 161, 242, 0.08);
+  --profile-border: rgba(235, 239, 240, 0.8);
+  --profile-text-primary: #1a1a1a;
+  --profile-text-secondary: #5b7083;
+  --profile-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --profile-radius: 16px;
+  --profile-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --profile-bg: rgba(21, 32, 43, 0.85);
+    --profile-bg-hover: rgba(29, 161, 242, 0.15);
+    --profile-border: rgba(56, 68, 77, 0.8);
+    --profile-text-primary: #f7f9f9;
+    --profile-text-secondary: #8b98a5;
+  }
+}
+
+/* Контейнер профілю */
+.profile-container {
+  background: var(--profile-bg);
+  backdrop-filter: blur(10px);
+  border-radius: var(--profile-radius);
+  border: 1px solid var(--profile-border);
+  box-shadow: var(--profile-shadow);
+  overflow: hidden;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Вкладки профілю */
+.profile-tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--profile-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.profile-tab {
+  flex: 1;
+  padding: 18px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--profile-transition);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--profile-text-secondary);
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  border: none;
+}
+
+.profile-tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: var(--profile-primary-gradient);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+}
+
+.profile-tab:hover {
+  background: var(--profile-bg-hover);
+  color: var(--profile-primary);
+}
+
+.profile-tab:hover::after {
+  width: 40px;
+}
+
+.profile-tab.active {
+  color: var(--profile-primary);
+  background: rgba(29, 161, 242, 0.05);
+}
+
+.profile-tab.active::after {
+  width: 80px;
+  background: var(--profile-primary);
+}
+
+/* Контент вкладок */
+.tab-content {
+  display: none;
+  padding: 24px;
+  animation: slideIn 0.4s ease-out;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Аватар користувача */
+.user-badge {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+  font-weight: 700;
+  margin: 0 auto 20px;
+  background: var(--profile-primary-gradient);
+  color: white;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(29, 161, 242, 0.3);
+  border: 4px solid white;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.user-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.8s ease;
+}
+
+.user-badge:hover {
+  transform: scale(1.05) rotate(5deg);
+  box-shadow: 0 12px 40px rgba(29, 161, 242, 0.4);
+}
+
+.user-badge:hover::before {
+  transform: translateX(100%);
+}
+
+.user-badge.online::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  background-color: #00c851;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 200, 81, 0.3);
+}
+
+/* Статистика */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+  margin: 30px 0;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: var(--profile-transition);
+  border: 1px solid var(--profile-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--profile-shadow);
+  border-color: var(--profile-primary);
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  background: var(--profile-primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: block;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  color: var(--profile-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Бейджи для активності */
+.activity-feed {
+  margin-top: 30px;
+}
+
+.activity-item {
+  padding: 18px;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  border-left: 4px solid;
+  transition: var(--profile-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.activity-item:hover {
+  transform: translateX(5px);
+  box-shadow: var(--profile-shadow);
+}
+
+.comment-badge {
+  border-left-color: #1da1f2;
+  background: linear-gradient(135deg, rgba(29, 161, 242, 0.05) 0%, rgba(255, 255, 255, 0.9) 100%);
+}
+
+.like-badge {
+  border-left-color: #e0245e;
+  background: linear-gradient(135deg, rgba(224, 36, 94, 0.05) 0%, rgba(255, 255, 255, 0.9) 100%);
+}
+
+.share-badge {
+  border-left-color: #17bf63;
+  background: linear-gradient(135deg, rgba(23, 191, 99, 0.05) 0%, rgba(255, 255, 255, 0.9) 100%);
+}
+
+.activity-icon {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+}
+
+.comment-badge .activity-icon {
+  background: var(--profile-primary-gradient);
+}
+
+.like-badge .activity-icon {
+  background: linear-gradient(135deg, #e0245e 0%, #ff6b9d 100%);
+}
+
+.share-badge .activity-icon {
+  background: linear-gradient(135deg, #17bf63 0%, #2ecc71 100%);
+}
+
+.activity-content {
+  padding-right: 50px;
+}
+
+.activity-text {
+  font-size: 14px;
+  color: var(--profile-text-primary);
+  margin-bottom: 4px;
+}
+
+.activity-time {
+  font-size: 12px;
+  color: var(--profile-text-secondary);
+  opacity: 0.8;
+}
+
+/* Стан "немає даних" */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--profile-text-secondary);
+  position: relative;
+}
+
+.empty-state::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  background: var(--profile-primary-gradient);
+  opacity: 0.05;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+  display: block;
+}
+
+.empty-state h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--profile-text-primary);
+}
+
+.empty-state p {
+  font-size: 14px;
+  max-width: 300px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* Адаптивність */
+@media (max-width: 768px) {
+  .profile-tabs {
+    flex-direction: column;
+  }
+  
+  .profile-tab {
+    padding: 14px;
+    border-bottom: 1px solid var(--profile-border);
+  }
+  
+  .profile-tab::after {
+    display: none;
+  }
+  
+  .user-badge {
+    width: 90px;
+    height: 90px;
+    font-size: 32px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .stat-card {
+    padding: 16px;
+  }
+  
+  .stat-number {
+    font-size: 28px;
+  }
+  
+  .tab-content {
+    padding: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .stat-card,
+  .activity-item {
+    background: rgba(21, 32, 43, 0.9);
+  }
+  
+  .empty-state::before {
+    background: rgba(29, 161, 242, 0.1);
+  }
+}
+
+/* Скелетон для завантаження */
+.skeleton {
+  background: linear-gradient(90deg, 
+    rgba(0, 0, 0, 0.05) 25%, 
+    rgba(0, 0, 0, 0.1) 50%, 
+    rgba(0, 0, 0, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Спеціальні ефекти */
+.glow-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.glow-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.glow-effect:hover::before {
+  left: 100%;
+}
+
+/* Анімація появи елементів */
+.stagger-item {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: staggerFadeIn 0.5s ease-out forwards;
+}
+
+@keyframes staggerFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0.1s; }
+.stagger-item:nth-child(2) { animation-delay: 0.2s; }
+.stagger-item:nth-child(3) { animation-delay: 0.3s; }
+.stagger-item:nth-child(4) { animation-delay: 0.4s; }

@@ -100,19 +100,21 @@
                 <form method="get" style="flex: 3;">
                     <input type="hidden" name="page_feed" value="{{ page_feed|add:'-1' }}" />
                     <input type="hidden" name="active_feed" value="feed1" />
-                    <button type="submit" class="post-button" style="width: 100%; margin-top: 0;">
+                    <button type="submit" class="pag-button" style="width: 100%; margin-top: 0;">
                         dozadu
                     </button>
                 </form>
                 {% endif %}
-
+                
+                
                 <form method="get" style="flex: 3;">
                     <input type="hidden" name="page_feed" value="{{ page_feed|add:'1' }}" />
                     <input type="hidden" name="active_feed" value="feed1" />
-                    <button type="submit" class="post-button" style="width: 100%; margin-top: 0;">
+                    <button type="submit" class="pag-button" style="width: 100%; margin-top: 0;">
                         dopredu
                     </button>
                 </form>
+                
             </div>
         </div>
 
@@ -187,7 +189,7 @@
                 <form method="get" style="flex: 1;">
                     <input type="hidden" name="page_explore" value="{{ page_explore|add:'-1' }}" />
                     <input type="hidden" name="active_feed" value="feed2" />
-                    <button type="submit" class="post-button" style="width: 100%; margin-top: 0;">
+                    <button type="submit" class="pag-button" style="width: 100%; margin-top: 0;">
                         dozadu
                     </button>
                 </form>
@@ -196,7 +198,7 @@
                 <form method="get" style="flex: 1;">
                     <input type="hidden" name="page_explore" value="{{ page_explore|add:'1' }}" />
                     <input type="hidden" name="active_feed" value="feed2" />
-                    <button type="submit" class="post-button" style="width: 100%; margin-top: 0;">
+                    <button type="submit" class="pag-button" style="width: 100%; margin-top: 0;">
                         dopredu
                     </button>
                 </form>
