@@ -28,11 +28,8 @@ DEBUG = True
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret')  # fallback для локалки
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ["localhost", "192.168.0.212", "147.175.113.158", "ca6b72496f0c.ngrok-free.app"]
+ALLOWED_HOSTS = ["localhost", "10.144.235.103"]
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://ca6b72496f0c.ngrok-free.app",
-]
 
 AUTH_USER_MODEL = 'accounts.User'
 
