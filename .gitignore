@@ -16,8 +16,7 @@ media/
 staticfiles/
 
 # Environment files (ВАЖЛИВО)
-.env
-*.env
+
 
 # IDE files
 .idea/
