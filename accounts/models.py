@@ -19,7 +19,7 @@ class User(AbstractUser):
 
 class Publication(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE, related_name="publications")
-    title = models.CharField(max_length=15)
+    title = models.CharField(max_length=30)
     text = models.CharField(max_length=100)
     tags = models.ManyToManyField("Tag", related_name="publications")
     created_at = models.DateTimeField(auto_now_add=True)
