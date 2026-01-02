@@ -4,10 +4,6 @@ from django.shortcuts import render
 
 
 
-def pizdec(request):
-    return render(request, "main.html")
-
-
 
 urlpatterns = [
     #auth
@@ -26,9 +22,6 @@ urlpatterns = [
     path("", views.home_page, name = "home_page"),
     path("profile/<str:username>/", views.profile, name="profile"),
     path("search/<str:search>/", views.search, name="search"),
-
-    path("pizdec/", pizdec, name="f"),
-
 
 ]
 
