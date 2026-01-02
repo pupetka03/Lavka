@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Lavka{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- CSRF токен для AJAX запитів -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    
+    {% block extra_css %}{% endblock %}
+    {% block extra_js_head %}{% endblock %}
+</head>
+
+
+
+<body>
+    <main>
+        {% load number_filters %} 
+        {% include "feed/modal_parts/comments_window_push.html" %}
+        {% include "nav_bar.html" %}
+        {% block content %}
+        <!-- Контент сторінок буде тут -->
+        {% endblock %}
+
+        <!-- Права колонка з тегами -->
+        <div class="sidebar-right">
+            <div class="trends-block">
+                <h3>Trendy tags</h3>
+                {% for tag in tags %}
+                <div class="trend-item">
+                    <div class="trend-name">{{ tag.name }}</div>
+                    <div class="trend-category">{{ tag.usage_count|humanize_k }} publikácií</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+    <!-- Додайте це в кінець main.html після тегу </main> -->
+<footer class="site-footer">
+    <div class="footer-container">
+        <!-- Основна навігація -->
+        <div class="footer-section">
+            <h4 class="footer-heading">Навігація</h4>
+            <ul class="footer-links">
+                <li><a href="{% url 'home_page' %}">Domov</a></li>
+                <li><a href="{% url 'home_page' %}">Vyhľadávanie</a></li>
+                <li><a href="{% url 'home_page' %}">Preskúmať</a></li>
+                <li><a href="{% url 'home_page' %}">Trendové tagy</a></li>
+                <li><a href="{% url 'home_page' %}">O nás</a></li>
+            </ul>
+        </div>
+        
+        <!-- Інформація -->
+        <div class="footer-section">
+            <h4 class="footer-heading">Informácie</h4>
+            <ul class="footer-links">
+                <li><a href="{% url 'home_page' %}">Zásady ochrany osobných údajov</a></li>
+                <li><a href="{% url 'home_page' %}">Podmienky používania</a></li>
+                <li><a href="{% url 'home_page' %}">Zásady používania cookies</a></li>
+                <li><a href="{% url 'home_page' %}">FAQ</a></li>
+                <li><a href="{% url 'home_page' %}">Kontakt</a></li>
+            </ul>
+        </div>
+        
+        <!-- Соціальні мережі -->
+        <div class="footer-section">
+            <h4 class="footer-heading">Sociálne siete</h4>
+            <div class="social-icons">
+                <a href="#" class="social-icon" title="Twitter">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.213c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                    </svg>
+                </a>
+                <a href="#" class="social-icon" title="GitHub">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                    </svg>
+                </a>
+                <a href="#" class="social-icon" title="Telegram">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.197c-.174-.422-.656-.648-1.059-.448l-10.03 4.219c-.39.164-.563.606-.387.976.175.37.656.597 1.048.433l2.082-.876v5.542c0 .598.478 1.083 1.068 1.083s1.068-.485 1.068-1.083v-6.25l6.901 2.893c.125.052.257.078.388.078.286 0 .56-.148.713-.409.175-.37.019-.816-.387-.976l-6.244-2.616 6.86-2.886c.403-.17.575-.615.402-.985z"/>
+                    </svg>
+                </a>
+            </div>
+            <p class="footer-text">Sledujte nás na sociálnych sieťach</p>
+        </div>
+        
+        <!-- Контакти та підписка -->
+        <div class="footer-section">
+            <h4 class="footer-heading">Odber</h4>
+            <p class="footer-text">Prihláste sa na odber noviniek</p>
+            <form class="subscribe-form">
+                <input type="email" placeholder="Váš e-mail" class="subscribe-input">
+                <button type="submit" class="subscribe-button">Prihlásiť sa</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Нижня частина футера -->
+    <div class="footer-bottom">
+        <div class="footer-bottom-content">
+            <div class="copyright">
+                <p>© 2026 Lavka. Všetky práva vyhradené.</p>
+            </div>
+            <div class="footer-logo">
+                <span class="logo-text">Lavka</span>
+            </div>
+            <div class="language-selector">
+                <select class="language-select">
+                    <option value="uk">Українська</option>
+                    <option value="en">English</option>
+                    <option value="sk">Slovenčina</option>
+                    <option value="cs">Čeština</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</footer>
+
+    <!-- Скрипти, які мають бути в кінці body -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

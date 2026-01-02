@@ -1,0 +1,36 @@
+{% extends "main.html" %}
+
+{% block extra_css %}
+{% load static %}
+{% endblock %}
+
+
+{% block content %}
+{% load static %}
+
+
+            <div class="main-content">
+            <!-- Перемикач фідів -->
+            <div class="feed-switcher">
+                <div class="feed-tab active" data-feed="feed1">Hlavna stranka</div>
+            </div>
+
+            <!-- Перший фід -->
+                <div class="new-post-form">
+                    <form method="POST" action="{% url 'create_publication' %}">
+                        {% csrf_token %}
+                        <input type="text" name="title" placeholder="Názov" class="post-textarea" style="font-weight: bold; padding: 5px 0; margin: 5px 0;"><br>
+                        <textarea name="text" class="post-textarea" placeholder="Co sa deje?"></textarea><br>
+                        <input type="text" name="tags" class="post-textarea" placeholder="Tagy (oddeli medzerou alebo cez ,)"><br>
+                        <button type="submit" class="post-button">Publikovat</button>
+                    </form>
+                    <div style="clear: both;"></div>
+
+                <div style="padding: 20px; text-align: center; color: #5b7083;">
+ 
+                </div>
+            </div>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lavka</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+
+</head>
+<body>
+
+    <div class="container">
+        <h2>Registrácia používateľa</h2>
+
+        <form method="post" action="/register/"> 
+            
+            {% csrf_token %} 
+
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li class="{{ message.tags }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <div>
+                <label for="user_name">User name:</label>
+                <input type="text" id="user_name" name="user_name" required>
+            </div>
+
+            <div>
+                <label for="first_name">Meno:</label>
+                <input type="text" id="first_name" name="first_name" required>
+            </div>
+
+            <div>
+                <label for="last_name">Priezvisko:</label>
+                <input type="text" id="last_name" name="last_name" required>
+            </div>
+
+            <div>
+                <label for="email">E-mail:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div>
+                <label for="password">Heslo:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <div class="gender-group">
+                <label class="group-title">Kto si?</label>
+                    <div class="radio-container">
+                        <input type="radio" id="male" name="gender" value="male" required>
+                        <label for="male">Muž</label>
+
+                        <input type="radio" id="female" name="gender" value="female">
+                        <label for="female">Žena</label>
+                    </div>
+            </div>
+
+            <button type="submit">Registrovať</button>
+        </form>
+
+        <div class="register-link">
+            <p>Ak máš profil, tak sa <a href="{% url 'login' %}">logni</a>.</p>
+        </div>
+
+    </div>
+    
+
+</body>
+</html>

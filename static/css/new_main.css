@@ -1,0 +1,1193 @@
+/* Базові стилі з сучасними покращеннями */
+:root {
+  --primary-gradient: linear-gradient(135deg, #1da1f2 0%, #794bc4 100%);
+  --primary-hover: linear-gradient(135deg, #0c85d0 0%, #6a3fb0 100%);
+  --bg-primary: #ffffff;
+  --bg-secondary: #f7f9f9;
+  --bg-tertiary: #eff3f4;
+  --border-color: rgba(235, 239, 240, 0.8);
+  --text-primary: #1a1a1a;
+  --text-secondary: #5b7083;
+  --text-tertiary: #8a98a4;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --backdrop-blur: blur(10px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary-gradient: linear-gradient(135deg, #1da1f2 0%, #9d7bdd 100%);
+    --primary-hover: linear-gradient(135deg, #0c85d0 0%, #8a6ad4 100%);
+    --bg-primary: #15202b;
+    --bg-secondary: #192734;
+    --bg-tertiary: #1e2d3d;
+    --border-color: rgba(56, 68, 77, 0.8);
+    --text-primary: #f7f9f9;
+    --text-secondary: #8b98a5;
+    --text-tertiary: #6d7b88;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.3);
+    --glass-bg: rgba(21, 32, 43, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.1);
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-size: 16px;
+  overflow-x: hidden;
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* Контейнер макету з сучасними ефектами */
+.container {
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 0 20px;
+  position: relative;
+}
+
+/* Ліва бокова панель з glassmorphism */
+.sidebar-left {
+  width: 280px;
+  padding: 24px 32px 24px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-tertiary) transparent;
+  z-index: 50;
+}
+
+.sidebar-left::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-left::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-left::-webkit-scrollbar-thumb {
+  background-color: var(--text-tertiary);
+  border-radius: 2px;
+}
+
+.sidebar-left nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.sidebar-left nav a {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: 17px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  backdrop-filter: var(--backdrop-blur);
+}
+
+.sidebar-left nav a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(29, 161, 242, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.sidebar-left nav a:hover {
+  background-color: rgba(29, 161, 242, 0.08);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-left nav a:hover::before {
+  left: 100%;
+}
+
+.sidebar-left nav a.active {
+  background: var(--primary-gradient);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.sidebar-left nav a span {
+  margin-left: 16px;
+  transition: transform var(--transition-fast);
+}
+
+.sidebar-left nav a:hover span {
+  transform: translateX(2px);
+}
+
+/* Центральна колонка з сучасними картками */
+.main-content {
+  flex-grow: 1;
+  max-width: 640px;
+  border-left: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  position: relative;
+  transition: all var(--transition-base);
+}
+
+/* Стилі для перемикача фідів з glassmorphism */
+.feed-switcher {
+  display: flex;
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 20px;
+  -webkit-backdrop-filter: var(--backdrop-blur);
+}
+
+.feed-tab {
+  flex: 1;
+  text-align: center;
+  padding: 18px 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+}
+
+.feed-tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: var(--primary-gradient);
+  transition: all var(--transition-base);
+  transform: translateX(-50%);
+}
+
+.feed-tab:hover {
+  background-color: rgba(29, 161, 242, 0.05);
+  color: var(--text-primary);
+}
+
+.feed-tab:hover::after {
+  width: 40px;
+}
+
+.feed-tab.active {
+  color: #1da1f2;
+}
+
+.feed-tab.active::after {
+  width: 80px;
+  background: #1da1f2;
+}
+
+.feed-content {
+  display: none;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.feed-content.active {
+  display: block;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Стилі для аватарок з градієнтами та анімаціями */
+.user-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  margin-right: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid white;
+}
+
+.user-avatar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.user-avatar:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: var(--shadow-md);
+}
+
+.user-avatar:hover::before {
+  transform: translateX(100%);
+}
+
+.user-avatar.online::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background-color: #00c851;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+  margin-right: 10px;
+  border-width: 1px;
+}
+
+/* Стилі для пошукового модального вікна */
+#search-modal {
+  backdrop-filter: blur(20px);
+  background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(20px);
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(20px);
+  }
+}
+
+#search-input {
+  font-size: 18px;
+  transition: all var(--transition-base);
+  padding: 16px 20px;
+  border-radius: var(--radius-full);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg);
+}
+
+#search-input:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(29, 161, 242, 0.2);
+  border-color: #1da1f2;
+}
+
+#search-results {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-tertiary) transparent;
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#search-results::-webkit-scrollbar {
+  width: 8px;
+}
+
+#search-results::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+#search-results::-webkit-scrollbar-thumb {
+  background-color: var(--text-tertiary);
+  border-radius: 4px;
+}
+
+.search-result-item {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-result-item:hover {
+  background-color: rgba(29, 161, 242, 0.08);
+  transform: translateX(4px);
+  border-left: 3px solid #1da1f2;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item .user-avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
+}
+
+.search-result-item:hover .user-avatar {
+  transform: scale(1.05);
+}
+
+/* Форма нового посту */
+.new-post-form {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  position: relative;
+}
+
+.new-post-form::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  width: 90%;
+  height: 1px;
+  background: var(--primary-gradient);
+  opacity: 0.3;
+}
+
+.post-textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 17px;
+  resize: none;
+  min-height: 60px;
+  padding: 12px 0;
+  box-sizing: border-box;
+  background-color: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  line-height: 1.5;
+  transition: all var(--transition-fast);
+}
+
+.post-textarea::placeholder {
+  color: var(--text-tertiary);
+  opacity: 0.7;
+}
+
+.post-textarea:focus {
+  min-height: 80px;
+}
+
+.post-button {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  cursor: pointer;
+  float: right;
+  transition: all var(--transition-base);
+  font-size: 15px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: var(--shadow-md);
+  letter-spacing: 0.3px;
+  min-width: 100px;
+}
+
+.post-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+  z-index: 1;
+}
+
+.post-button:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+.post-button:hover::before {
+  left: 100%;
+}
+
+.post-button:active {
+  transform: translateY(0) scale(0.98);
+  transition: all var(--transition-fast);
+}
+
+/* Покращений pag-button */
+.pag-button {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  font-size: 15px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: var(--shadow-md);
+  letter-spacing: 0.3px;
+  min-width: 140px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.pag-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+  z-index: 1;
+}
+
+.pag-button:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+.pag-button:hover::before {
+  left: 100%;
+}
+
+.pag-button:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--shadow-sm);
+}
+
+.pag-button__icon {
+  width: 18px;
+  height: 18px;
+  transition: transform var(--transition-base);
+}
+
+.pag-button:hover .pag-button__icon {
+  transform: translateX(4px);
+}
+
+/* Стилі для публікацій з сучасними картками */
+.publication-wrapper {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  background: var(--bg-primary);
+}
+
+.publication-wrapper:hover {
+  background-color: rgba(29, 161, 242, 0.03);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.publication-wrapper::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: var(--primary-gradient);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.publication-wrapper:hover::before {
+  opacity: 1;
+}
+
+.post-author {
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.post-handle {
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.post-text {
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 12px 0;
+  word-break: break-word;
+  color: var(--text-primary);
+}
+
+.post-tags {
+  margin: 12px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  color: #1da1f2;
+  background: rgba(29, 161, 242, 0.1);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.tag:hover {
+  background: rgba(29, 161, 242, 0.2);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.post-stats {
+  color: var(--text-secondary);
+  font-size: 15px;
+  margin-top: 16px;
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.post-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color var(--transition-fast);
+  cursor: pointer;
+}
+
+.post-stat-item:hover {
+  color: #1da1f2;
+}
+
+.post-stat-item .icon {
+  width: 20px;
+  height: 20px;
+  transition: transform var(--transition-fast);
+}
+
+.post-stat-item:hover .icon {
+  transform: scale(1.2);
+}
+
+/* Стилі для коментарів */
+.comment-section-wrapper {
+  padding: 16px 0 0 20px;
+  margin-top: 12px;
+  border-top: 1px solid var(--border-color);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.comment-item {
+  padding: 16px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  border-left: 3px solid #1da1f2;
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(29, 161, 242, 0.05) 100%);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.comment-item:hover {
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(29, 161, 242, 0.1) 100%);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-sm);
+}
+
+.comment-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--primary-gradient);
+  opacity: 0.3;
+}
+
+.comment-text {
+  margin-top: 6px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.comment-author {
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+}
+
+/* Права бокова панель */
+.sidebar-right {
+  width: 380px;
+  padding: 24px 0 24px 32px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-tertiary) transparent;
+}
+
+.sidebar-right::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-right::-webkit-scrollbar-thumb {
+  background-color: var(--text-tertiary);
+  border-radius: 2px;
+}
+
+.trends-block {
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  border-radius: var(--radius-xl);
+  padding: 20px 0;
+  margin-bottom: 20px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-base);
+}
+
+.trends-block:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.trends-block h3 {
+  font-size: 20px;
+  padding: 0 20px 16px;
+  margin: 0;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.trend-item {
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border-bottom: 1px solid var(--border-color);
+  position: relative;
+}
+
+.trend-item:hover {
+  background-color: rgba(29, 161, 242, 0.08);
+}
+
+.trend-item:last-child {
+  border-bottom: none;
+}
+
+.trend-item:hover .trend-name {
+  color: #1da1f2;
+}
+
+.trend-category {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.trend-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-top: 4px;
+  transition: color var(--transition-fast);
+}
+
+/* Сучасні ефекти для всіх інтерактивних елементів */
+@media (hover: hover) {
+  .publication-wrapper,
+  .trend-item,
+  .comment-item,
+  .search-result-item {
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+  
+  .publication-wrapper:hover,
+  .trend-item:hover,
+  .comment-item:hover,
+  .search-result-item:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Адаптивність для мобільних пристроїв */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0;
+  }
+  
+  .sidebar-left {
+    width: 88px;
+    padding: 20px 12px;
+    align-items: center;
+  }
+  
+  .sidebar-left nav a span {
+    display: none;
+  }
+  
+  .sidebar-left nav a {
+    padding: 14px;
+    justify-content: center;
+  }
+  
+  .sidebar-right {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+  
+  .sidebar-left {
+    width: 100%;
+    height: auto;
+    padding: 12px 16px;
+    position: fixed;
+    bottom: 0;
+    top: auto;
+    background: var(--glass-bg);
+    backdrop-filter: var(--backdrop-blur);
+    border-top: 1px solid var(--border-color);
+    z-index: 100;
+  }
+  
+  .sidebar-left nav {
+    flex-direction: row;
+    justify-content: space-around;
+    margin-top: 0;
+  }
+  
+  .sidebar-left nav a {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border-radius: var(--radius-full);
+  }
+  
+  .main-content {
+    max-width: 100%;
+    border: none;
+    margin-bottom: 80px;
+  }
+  
+  .feed-switcher {
+    padding: 0 16px;
+    background: var(--bg-primary);
+  }
+  
+  .feed-tab {
+    padding: 16px 8px;
+    font-size: 15px;
+  }
+  
+  .publication-wrapper {
+    padding: 16px;
+  }
+  
+  .new-post-form {
+    padding: 16px;
+  }
+  
+  .post-textarea {
+    font-size: 16px;
+  }
+  
+  .post-button {
+    padding: 10px 20px;
+    min-width: 90px;
+  }
+  
+  .pag-button {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    display: block;
+    float: none;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --radius-md: 10px;
+    --radius-lg: 14px;
+  }
+  
+  .post-author {
+    font-size: 15px;
+  }
+  
+  .post-handle {
+    font-size: 14px;
+  }
+  
+  .post-text {
+    font-size: 15px;
+  }
+  
+  .post-stats {
+    font-size: 14px;
+    gap: 16px;
+  }
+  
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+  
+  .comment-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+}
+
+/* Анімації завантаження */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.loading-shimmer {
+  background: linear-gradient(90deg, 
+    var(--bg-tertiary) 25%, 
+    var(--bg-secondary) 50%, 
+    var(--bg-tertiary) 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Темна тема доповнень */
+@media (prefers-color-scheme: dark) {
+  .tag {
+    color: #71c9f8;
+    background: rgba(113, 201, 248, 0.15);
+  }
+  
+  .tag:hover {
+    background: rgba(113, 201, 248, 0.25);
+  }
+  
+  .comment-item {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(113, 201, 248, 0.05) 100%);
+  }
+  
+  .comment-item:hover {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(113, 201, 248, 0.1) 100%);
+  }
+}
+
+/* Спеціальні класи для інтерактивних елементів */
+.interactive-card {
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.interactive-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.glass-effect {
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+}
+
+.hover-lift {
+  transition: transform var(--transition-base);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Анімації для skeleton loading */
+.skeleton {
+  animation: skeleton-loading 1.5s infinite ease-in-out;
+  background: linear-gradient(90deg, 
+    var(--bg-tertiary) 25%, 
+    var(--bg-secondary) 50%, 
+    var(--bg-tertiary) 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Плавні переходи для темної теми */
+body.dark-mode-transition {
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Покращена типографіка */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+p {
+  margin-bottom: 1em;
+}
+
+strong {
+  font-weight: 700;
+}
+
+em {
+  font-style: italic;
+}
+
+/* Стилі для прокручування */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-gradient);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
+}
+
+/* Фокус-стайли для доступності */
+:focus-visible {
+  outline: 2px solid #1da1f2;
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Анімація появи елементів */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Медіа-запити для високої роздільності */
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1600px;
+  }
+  
+  .main-content {
+    max-width: 700px;
+  }
+  
+  .sidebar-right {
+    width: 420px;
+  }
+}
+
+/* Оптимізація для тач-пристроїв */
+@media (pointer: coarse) {
+  .feed-tab,
+  .sidebar-left nav a,
+  .post-button,
+  .pag-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .user-avatar {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* Додаткові ефекти при наведенні */
+.trend-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--primary-gradient);
+  transition: width var(--transition-base);
+}
+
+.trend-item:hover::after {
+  width: 100%;
+}
+
+/* Стилі для активної навігації */
+.sidebar-left nav a.active::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--primary-gradient);
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lavka</title>
+    {% load static %}
+    
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+
+</head>
+<body>
+
+    <div class="container">
+        <h2>Prihlásenie do účtu</h2>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}"> 
+            
+            {% csrf_token %} 
+
+            <div>
+                <label for="username">Používateľské meno alebo e-mail:</label>
+                <input type="text" id="username" name="username" required 
+                       placeholder="Vaše používateľské meno">
+            </div>
+
+            <div>
+                <label for="password">Heslo:</label>
+                <input type="password" id="password" name="password" required 
+                       placeholder="Vaše heslo">
+            </div>
+
+            <button type="submit">Prihlásiť sa</button>
+        </form>
+        
+        <div class="register-link">
+            <p>Ešte nemáš účet? <a href="{% url 'register' %}">Registrovať</a></p>
+        </div>
+
+    </div>
+
+</body>
+</html>

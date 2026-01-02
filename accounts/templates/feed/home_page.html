@@ -1,0 +1,256 @@
+{% extends "main.html" %}
+{% block title %}Feed{% endblock %}
+
+{% block extra_css %}
+{% load static %}
+{% endblock %}
+
+{% block content %}
+{% load static %}
+
+
+
+<div class="main-content">
+    <!-- Перемикач фідів -->
+    <div class="feed-switcher">
+        <div class="feed-tab active" data-feed="feed1">Hlavna stranka</div>
+        {% if request.user.is_authenticated %}
+        <div class="feed-tab" data-feed="feed2">Objavovanie</div>
+        {% endif %}
+    </div>
+
+    <!-- Перший фід -->
+    <div id="feed1" class="feed-content active">
+        {% for pub in publication %}
+        <div class="publication-wrapper" id="pub-{{ pub.slug }}">
+            <div>
+                <div class="post-author">
+                    <a href="{% url 'profile' pub.user.username %}" class="user-avatar">
+                        {{ pub.user.username|first|upper }}
+                    </a>
+                    {{ pub.title }}
+                    <span class="post-handle">@{{ pub.user.username }}</span>
+                </div>
+
+                <div class="post-text">
+                    <a href="{% url 'pub' pub.slug %}" style="text-decoration:none; color:inherit; cursor:pointer;">
+                        {{ pub.text }}
+                    </a>
+                </div>
+                
+                <div class="post-tags">
+                    {% for tag in pub.tags.all %}
+                    <span class="tag">#{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="post-stats">
+                    {% if request.user.is_authenticated %}
+                        <!-- Додаємо клас, а не id, бо буде багато таких кнопок -->
+                        <button type="button" class="comments-toggle-btn-origin" data-slug="{{ pub.slug }}">
+                            💬 {{ pub.comments.count }}
+                        </button>
+                    {% else %}
+                        <span style="color:inherit; cursor:default;">
+                            💬 {{ pub.comments.count }}
+                        </span>
+                    {% endif %}
+                    
+                    <span class="like-button" data-slug="{{ pub.slug }}" style="cursor:pointer;">
+                        ❤️ <span class="like-count">{{ pub.likes.count }}</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Коментарі для цієї публікації -->
+            {% for comment in pub.comments.all|slice:":3" %} 
+                {% if not comment.parent %}
+                <div class="comment-section-wrapper">
+                    <div class="comment-item">
+                        <div class="comment-author">
+                            <a href="{% url 'profile' comment.user.username %}" class="user-avatar comment-avatar">
+                                {{ comment.user.username|first|upper }}
+                            </a>
+                            {{ comment.user }}
+                            <span class="post-handle">@{{ comment.user }}</span>
+                        </div>
+                        <div class="comment-text">{{ comment.text }}</div>
+                    </div>
+                </div>
+                {% endif %} 
+            {% endfor %}
+        </div>
+        {% empty %}
+        <div style="padding: 20px; text-align: center; color: #5b7083;">
+            Zatiaľ žiadny obsah
+        </div>
+        {% endfor %}
+        
+        <!-- Пагінація -->
+        <div class="pagination">
+            {% if page_feed > 0 %}
+            <form method="get" style="flex: 1;">
+                <input type="hidden" name="page_feed" value="{{ page_feed|add:'-1' }}" />
+                <input type="hidden" name="active_feed" value="feed1" />
+                <button type="submit" class="pag-button" style="width: 100%; margin-top: 0;">
+                    dozadu
+                </button>
+            </form>
+            {% else %}
+            <div style="flex: 1;"></div>
+            {% endif %}
+            
+            <form method="get" style="flex: 1;">
+                <input type="hidden" name="page_feed" value="{{ page_feed|add:'1' }}" />
+                <input type="hidden" name="active_feed" value="feed1" />
+                <button type="submit" class="pag-button" style="width: 100%; margin-top: 0;">
+                    dopredu
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Другий фід -->
+    <div id="feed2" class="feed-content">
+        {% for pub in explore_publications %}
+        <div class="publication-wrapper">
+            <div>
+                <div class="post-author">
+                    <a href="{% url 'profile' pub.user.username %}" class="user-avatar">
+                        {{ pub.user.username|first|upper }}
+                    </a>
+                    {{ pub.title }}
+                    <span class="post-handle">@{{ pub.user.username }}</span>
+                </div>
+                
+                <div class="post-text">
+                    <a href="{% url 'pub' pub.slug %}" style="text-decoration:none; color:inherit; cursor:pointer;">
+                        {{ pub.text }}
+                    </a>
+                </div>
+                
+                <div class="post-tags">
+                    {% for tag in pub.tags.all %}
+                    <span class="tag">#{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="post-stats">
+                    {% if request.user.is_authenticated %}
+                        <button type="button" class="comments-toggle-btn-origin" data-slug="{{ pub.slug }}">
+                            💬 {{ pub.comments.count }}
+                        </button>
+                    {% else %}
+                        <span style="color:inherit; cursor:default;">
+                            💬 {{ pub.comments.count }}
+                        </span>
+                    {% endif %}
+                    
+                    <span class="like-button" data-slug="{{ pub.slug }}" style="cursor:pointer;">
+                        ❤️ <span class="like-count">{{ pub.likes.count }}</span>
+                    </span>
+                </div>
+            </div>
+            
+            {% for comment in pub.comments.all|slice:":3" %} 
+                {% if not comment.parent %}
+                <div class="comment-section-wrapper">
+                    <div class="comment-item">
+                        <div class="comment-author">
+                            <a href="{% url 'profile' comment.user.username %}" class="user-avatar comment-avatar">
+                                {{ comment.user.username|first|upper }}
+                            </a>
+                            {{ comment.user }}
+                            <span class="post-handle">@{{ comment.user }}</span>
+                        </div>
+                        <div class="comment-text">{{ comment.text }}</div>
+                    </div>
+                </div>
+                {% endif %} 
+            {% endfor %}
+        </div>
+        {% empty %}
+        <div style="padding: 20px; text-align: center; color: #5b7083;">
+            Zatiaľ nie je k dispozícii žiadny obsah pre nováčikov.
+        </div>
+        {% endfor %}
+        
+        <!-- Пагінація -->
+        <div class="pagination">
+            {% if page_explore > 0 %}
+            <form method="get" style="flex: 1;">
+                <input type="hidden" name="page_explore" value="{{ page_explore|add:'-1' }}" />
+                <input type="hidden" name="active_feed" value="feed2" />
+                <button type="submit" class="pag-button" style="width: 100%; margin-top: 0;">
+                    dozadu
+                </button>
+            </form>
+            {% else %}
+            <div style="flex: 1;"></div>
+            {% endif %}
+
+            <form method="get" style="flex: 1;">
+                <input type="hidden" name="page_explore" value="{{ page_explore|add:'1' }}" />
+                <input type="hidden" name="active_feed" value="feed2" />
+                <button type="submit" class="pag-button" style="width: 100%; margin-top: 0;">
+                    dopredu
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/push_comments.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // --- ЗБЕРЕЖЕННЯ АКТИВНОГО ФІДУ ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeFeedFromUrl = urlParams.get('active_feed');
+
+        if (activeFeedFromUrl) {
+            const targetTab = document.querySelector(`.feed-tab[data-feed="${activeFeedFromUrl}"]`);
+            const targetContent = document.getElementById(activeFeedFromUrl);
+
+            if (targetTab && targetContent) {
+                document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.feed-content').forEach(content => content.classList.remove('active'));
+                
+                targetTab.classList.add('active');
+                targetContent.classList.add('active');
+            }
+        }
+
+        // --- ПЕРЕМИКАЧ ФІДІВ ---
+        document.querySelectorAll('.feed-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const feedId = tab.getAttribute('data-feed');
+                
+                document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                document.querySelectorAll('.feed-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(feedId).classList.add('active');
+            });
+        });
+
+        // --- ЛАЙКИ ---
+        document.querySelectorAll('.like-button').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const slug = btn.dataset.slug;
+                const response = await fetch(`/like/${slug}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+                const data = await response.json();
+                btn.querySelector('.like-count').textContent = data.likes;
+            });
+        });
+    });
+</script>
+{% endblock %}

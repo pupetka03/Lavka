@@ -1,0 +1,41 @@
+<div class="reply-item">
+    <div class="reply-header">
+        <div class="reply-avatar">{{ reply.user.username|first|upper }}</div>
+        <div class="reply-info">
+            <span class="reply-author">{{ reply.user.username }}</span>
+            <span class="reply-time">{{ reply.created_at|timesince }} pred</span>
+        </div>
+    </div>
+
+    <div class="reply-text">
+        <span class="reply-to">@{{ reply.parent.user.username }}</span>
+        {{ reply.text }}
+    </div>
+
+    <div class="reply-actions">
+        <button class="reply-like-btn" data-comment-id="{{ reply.id }}">
+            ♡ <span class="reply-like-count">{{ reply.likes.count }}</span>
+        </button>
+    <!-- <button class="reply-reply-btn" data-comment-id="{{ reply.id }}" onclick="window.location.href='{% url 'create_reply' pub.slug reply.id %}'">
+        💬 Odpoved
+    </button> -->
+
+    <a class="stat-link comment-link comments-toggle-btn-origin reply-btn"
+   		data-slug="{{ pub.slug }}"
+   		data-parent="{{ reply.id }}">
+    		Odpoveď
+	</a>
+
+    </div>
+
+    {% if reply.replies.all %}
+    <div class="comment-author-info">
+        {% for r in reply.replies.all %}
+            {% include "post_users/_replies.html" with reply=r %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+
+
