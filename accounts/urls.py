@@ -1,5 +1,6 @@
 from django.urls import path, re_path
 from . import views
+from django.shortcuts import render
 
 
 
@@ -22,5 +23,5 @@ urlpatterns = [
     path("profile/<str:username>/", views.profile, name="profile"),
     path("search/<str:search>/", views.search, name="search"),
 
-
 ]
+

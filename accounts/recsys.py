@@ -10,11 +10,6 @@ from random import shuffle
 
 
 
-
-
-#this is recomendation systems only for publication
-#TIME_LIMIT = timezone.now() - timedelta(days=100)
-
 def get_time_limit(days=1):
     return timezone.now() - timedelta(days=days)
 
