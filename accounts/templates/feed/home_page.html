@@ -3,83 +3,7 @@
 
 {% block extra_css %}
 {% load static %}
-<style>
-/* Фіксуємо мінімальну висоту для контенту */
-.main-content {
-    min-height: calc(100vh - 200px); /* 200px для футера */
-    display: flex;
-    flex-direction: column;
-}
 
-.feed-content {
-    flex: 1;
-    min-height: 500px; /* Мінімальна висота для запобігання стрибкам */
-}
-
-.loading-spinner {
-    display: none;
-    text-align: center;
-    padding: 20px;
-    color: #5b7083;
-}
-.loading-spinner.active {
-    display: block;
-}
-
-/* Плавна поява нового контенту */
-.publication-wrapper {
-    animation: fadeIn 0.3s ease-in;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Skeleton loader для кращого UX */
-.loading-spinner.active::after {
-    content: '';
-    display: block;
-    width: 100%;
-    height: 100px;
-    background: linear-gradient(
-        90deg,
-        #f0f0f0 25%,
-        #e0e0e0 50%,
-        #f0f0f0 75%
-    );
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-    border-radius: 8px;
-    margin-top: 10px;
-}
-
-@keyframes loading {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
-    }
-}
-
-/* Адаптація для мобілки */
-@media (max-width: 768px) {
-    .main-content {
-        min-height: calc(100vh - 150px);
-    }
-    
-    .feed-content {
-        min-height: 400px;
-    }
-}
-</style>
 {% endblock %}
 
 {% block content %}
@@ -109,6 +33,17 @@
             Zatiaľ žiadny obsah
         </div>
         {% endif %}
+        
+        <!-- Контейнер для кнопки завантаження -->
+        <div class="load-more-btn-container">
+            <button class="load-more-btn" data-feed="feed1">Načítať viac</button>
+        </div>
+        
+        <!-- Лічильник постів
+        <div class="posts-counter" data-feed="feed1">
+            Zobrazené: <span class="posts-count">0</span> publikácií
+        </div>
+        -->
     </div>
 
     <!-- Другий фід -->
@@ -126,6 +61,17 @@
             Zatiaľ nie je k dispozícii žiadny obsah pre nováčikov.
         </div>
         {% endif %}
+        
+        <!-- Контейнер для кнопки завантаження -->
+        <div class="load-more-btn-container">
+            <button class="load-more-btn" data-feed="feed2">Načítať viac</button>
+        </div>
+        
+        <!-- Лічильник постів 
+        <div class="posts-counter" data-feed="feed2">
+            Zobrazené: <span class="posts-count">0</span> publikácií
+        </div>
+        -->
     </div>
 </div>
 
@@ -134,42 +80,121 @@
 {% block extra_js %}
 <script src="{% static 'js/push_comments.js' %}"></script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-    // Стан пагінації для кожного фіду
-    let feedState = {
-        feed1: { page: 0, loading: false, hasMore: true },
-        feed2: { page: 0, loading: false, hasMore: true }
+(function() {
+    // Конфігурація
+    const POSTS_PER_PAGE = 10; // Скільки постів завантажується за раз
+    const SCROLL_THRESHOLD = 800; // Коли завантажувати автоматично (px від низу)
+    
+    // Стан для кожного фіду
+    const feedState = {
+        feed1: { 
+            page: 1, 
+            loading: false, 
+            hasMore: true, 
+            initialLoad: false,
+            totalLoaded: 0
+        },
+        feed2: { 
+            page: 1, 
+            loading: false, 
+            hasMore: true, 
+            initialLoad: false,
+            totalLoaded: 0
+        }
     };
     
     let currentFeed = 'feed1';
+    let isScrolling = false;
     
-    // --- ПЕРЕМИКАЧ ФІДІВ ---
-    document.querySelectorAll('.feed-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            const feedId = tab.getAttribute('data-feed');
-            currentFeed = feedId;
+    // Оновлення лічильника постів
+    function updatePostsCounter(feedId) {
+        const feedContent = document.getElementById(feedId);
+        if (!feedContent) return;
+        
+        const container = feedContent.querySelector('.publications-container');
+        const posts = container.querySelectorAll('.publication-wrapper');
+        const counter = feedContent.querySelector('.posts-count');
+        const state = feedState[feedId];
+        
+        state.totalLoaded = posts.length;
+        
+        if (counter) {
+            counter.textContent = state.totalLoaded;
+        }
+        
+        // Оновлюємо кнопку
+        updateLoadMoreButton(feedId);
+    }
+    
+    // Оновлення стану кнопки
+    function updateLoadMoreButton(feedId) {
+        const feedContent = document.getElementById(feedId);
+        if (!feedContent) return;
+        
+        const btn = feedContent.querySelector('.load-more-btn');
+        const state = feedState[feedId];
+        
+        if (btn) {
+            btn.disabled = state.loading || !state.hasMore;
+            btn.classList.toggle('loading', state.loading);
             
-            document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-
-            document.querySelectorAll('.feed-content').forEach(content => content.classList.remove('active'));
-            document.getElementById(feedId).classList.add('active');
+            if (!state.hasMore && state.totalLoaded > 0) {
+                btn.textContent = 'Všetky publikácie načítané';
+            } else if (state.loading) {
+                btn.textContent = 'Načítavanie...';
+            } else {
+                btn.textContent = 'Načítať viac';
+            }
+        }
+    }
+    
+    // Ініціалізація вкладок
+    function initTabs() {
+        document.querySelectorAll('.feed-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const feedId = this.dataset.feed;
+                
+                // Оновлюємо активні вкладки
+                document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.querySelectorAll('.feed-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                const activeContent = document.getElementById(feedId);
+                activeContent.classList.add('active');
+                
+                currentFeed = feedId;
+                
+                // Оновлюємо лічильник
+                updatePostsCounter(feedId);
+                
+                // Перевіряємо чи треба завантажити контент
+                const container = activeContent.querySelector('.publications-container');
+                const posts = container.querySelectorAll('.publication-wrapper');
+                
+                if (posts.length === 0 && !feedState[feedId].initialLoad) {
+                    loadMorePosts(feedId);
+                }
+            });
         });
-    });
-
-    // --- INFINITE SCROLL ---
-    const loadMorePosts = async (feedId) => {
+    }
+    
+    // Завантаження постів
+    async function loadMorePosts(feedId, isManual = false) {
         const state = feedState[feedId];
         
         if (state.loading || !state.hasMore) return;
         
         state.loading = true;
+        updateLoadMoreButton(feedId);
+        
         const feedContent = document.getElementById(feedId);
         const spinner = feedContent.querySelector('.loading-spinner');
-        spinner.classList.add('active');
+        if (spinner) spinner.classList.add('active');
         
         try {
-            state.page += 1;
             const pageParam = feedId === 'feed1' ? 'page_feed' : 'page_explore';
             const url = `?${pageParam}=${state.page}&feed_type=${feedId}`;
             
@@ -179,72 +204,117 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
             
+            if (!response.ok) throw new Error('Помилка мережі');
+            
             const data = await response.json();
             
-            if (data.html.trim()) {
+            if (data.html && data.html.trim()) {
                 const container = feedContent.querySelector('.publications-container');
-                container.insertAdjacentHTML('beforeend', data.html);
                 
-                // Реініціалізуємо лайки для нових постів
+                // При першому завантаженні прибираємо empty state
+                if (state.page === 1) {
+                    const emptyState = container.querySelector('.empty-feed');
+                    if (emptyState) emptyState.style.display = 'none';
+                }
+                
+                container.insertAdjacentHTML('beforeend', data.html);
                 initializeLikes();
                 
-                state.hasMore = data.has_more;
+                // Оновлюємо стан
+                state.hasMore = data.has_more !== false;
+                if (data.has_more) {
+                    state.page++;
+                }
+                
+                state.initialLoad = true;
+                
+                // Оновлюємо лічильник
+                updatePostsCounter(feedId);
+                
+                // Якщо завантажили мало постів, автоматично завантажуємо ще
+                if (!isManual && state.totalLoaded < POSTS_PER_PAGE * 2 && state.hasMore) {
+                    setTimeout(() => loadMorePosts(feedId), 300);
+                }
+                
             } else {
                 state.hasMore = false;
+                
+                // Показуємо empty state якщо нічого не завантажилось
+                if (state.page === 1) {
+                    const container = feedContent.querySelector('.publications-container');
+                    const emptyState = container.querySelector('.empty-feed');
+                    if (!emptyState) {
+                        container.innerHTML = '<div class="empty-feed" style="padding: 40px; text-align: center; color: #5b7083;">Žiadny obsah</div>';
+                    }
+                }
+                
+                updatePostsCounter(feedId);
             }
         } catch (error) {
             console.error('Помилка завантаження:', error);
-            state.page -= 1; // Повертаємо сторінку назад при помилці
+            // Повертаємо сторінку назад при помилці
+            state.page = Math.max(1, state.page - 1);
         } finally {
             state.loading = false;
-            spinner.classList.remove('active');
+            if (spinner) spinner.classList.remove('active');
+            updateLoadMoreButton(feedId);
         }
-    };
-
-    // Відстежування прокрутки з урахуванням футера
-    const handleScroll = () => {
-        const feedContent = document.getElementById(currentFeed);
-        if (!feedContent || !feedContent.classList.contains('active')) return;
+    }
+    
+    // Перевірка скролу
+    function checkScroll() {
+        if (feedState[currentFeed].loading || !feedState[currentFeed].hasMore) return;
         
-        // Використовуємо getBoundingClientRect для точнішого визначення
-        const container = feedContent.querySelector('.publications-container');
-        if (!container) return;
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const docHeight = document.documentElement.scrollHeight;
         
-        const containerRect = container.getBoundingClientRect();
-        const triggerPoint = window.innerHeight - 400; // Завантажуємо за 400px
-        
-        // Перевіряємо чи дно контейнера досягло точки тригеру
-        if (containerRect.bottom <= triggerPoint) {
+        // Завантажуємо коли залишилось SCROLL_THRESHOLD px до кінця
+        if (scrollTop + windowHeight >= docHeight - SCROLL_THRESHOLD) {
             loadMorePosts(currentFeed);
         }
-    };
-
-    // Throttle для оптимізації
-    let scrollTimeout;
-    window.addEventListener('scroll', () => {
-        if (scrollTimeout) clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(handleScroll, 100);
-    });
-
-    // --- ЛАЙКИ ---
+    }
+    
+    // Обробник скролу з throttle
+    function handleScroll() {
+        if (!isScrolling) {
+            isScrolling = true;
+            checkScroll();
+            
+            setTimeout(() => {
+                isScrolling = false;
+            }, 200);
+        }
+    }
+    
+    // Ініціалізація лайків
     function initializeLikes() {
         document.querySelectorAll('.like-button').forEach(btn => {
-            // Видаляємо старі обробники
-            const newBtn = btn.cloneNode(true);
-            btn.parentNode.replaceChild(newBtn, btn);
+            if (btn.dataset.listener) return;
             
-            newBtn.addEventListener('click', async () => {
-                const slug = newBtn.dataset.slug;
+            btn.dataset.listener = 'true';
+            
+            btn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                const slug = this.dataset.slug;
+                
                 try {
                     const response = await fetch(`/like/${slug}/`, {
                         method: "POST",
                         headers: {
                             "X-CSRFToken": "{{ csrf_token }}",
+                            "Content-Type": "application/json",
                             "X-Requested-With": "XMLHttpRequest"
                         }
                     });
-                    const data = await response.json();
-                    newBtn.querySelector('.like-count').textContent = data.likes;
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const countSpan = this.querySelector('.like-count');
+                        if (countSpan) {
+                            countSpan.textContent = data.likes;
+                        }
+                    }
                 } catch (error) {
                     console.error('Помилка лайку:', error);
                 }
@@ -252,7 +322,64 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     
-    initializeLikes();
-});
+    // Ініціалізація кнопок завантаження
+    function initLoadMoreButtons() {
+        document.querySelectorAll('.load-more-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const feedId = this.dataset.feed;
+                loadMorePosts(feedId, true);
+            });
+        });
+    }
+    
+    // Ініціалізація сторінки
+    function init() {
+        initTabs();
+        initializeLikes();
+        initLoadMoreButtons();
+        
+        // Додаємо обробник скролу
+        window.addEventListener('scroll', handleScroll);
+        
+        // Завантажуємо початковий контент для кожного фіду
+        setTimeout(() => {
+            // Для активного фіду
+            const activeFeedContent = document.getElementById(currentFeed);
+            const activeContainer = activeFeedContent.querySelector('.publications-container');
+            const activePosts = activeContainer.querySelectorAll('.publication-wrapper');
+            
+            if (activePosts.length === 0 && !feedState[currentFeed].initialLoad) {
+                loadMorePosts(currentFeed);
+            } else {
+                updatePostsCounter(currentFeed);
+            }
+            
+            // Для неактивних фідів (попередньо завантажимо один раз)
+            ['feed1', 'feed2'].forEach(feedId => {
+                if (feedId !== currentFeed) {
+                    const feedContent = document.getElementById(feedId);
+                    if (feedContent) {
+                        const container = feedContent.querySelector('.publications-container');
+                        const posts = container.querySelectorAll('.publication-wrapper');
+                        
+                        if (posts.length === 0 && !feedState[feedId].initialLoad) {
+                            // Можна попередньо завантажити одну сторінку
+                            setTimeout(() => loadMorePosts(feedId), 500);
+                        } else {
+                            updatePostsCounter(feedId);
+                        }
+                    }
+                }
+            });
+        }, 100);
+    }
+    
+    // Запускаємо
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
 </script>
 {% endblock %}

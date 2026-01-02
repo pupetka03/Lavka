@@ -6,6 +6,7 @@ html, body {
     font-family: 'Inter', sans-serif;
     background-color: #f7f9f9;
     color: #1a1a1a;
+    overflow-x: hidden;
 }
 
 body {
@@ -19,7 +20,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    flex-direction: column
+    width: 100%;
 }
 
 /* Контейнер макету */
@@ -29,6 +30,7 @@ body {
     max-width: 1300px;
     margin: 0 auto;
     width: 100%;
+    min-height: calc(100vh - 200px); /* Враховуємо футер */
 }
 
 /* ========== ЛІВА БОКОВА ПАНЕЛЬ ========== */
@@ -39,6 +41,7 @@ body {
     top: 0;
     height: fit-content;
     align-self: flex-start;
+    z-index: 5;
 }
 
 .sidebar-left nav a {
@@ -64,16 +67,15 @@ body {
 
 /* ========== ЦЕНТРАЛЬНА КОЛОНКА ========== */
 .main-content {
-    flex-grow: 1;
+    flex: 1;
     max-width: 600px;
-    min-height: calc(100vh - 250px); /* Віднімаємо висоту футера */
     min-width: 0; /* Важливо для flexbox */
     border-left: 1px solid #ebeef0;
     border-right: 1px solid #ebeef0;
     background-color: #ffffff;
     display: flex;
     flex-direction: column;
-
+    position: relative;
 }
 
 /* Стилі для перемикача фідів */
@@ -108,15 +110,18 @@ body {
 
 .feed-content {
     display: none;
+    flex: 1;
+    flex-direction: column;
 }
 
 .feed-content.active {
-    display: block;
+    display: flex;
 }
-/* Кожен фід контент */
-.feed-content {
+
+/* Контейнер для публікацій */
+.publications-container {
     flex: 1;
-    min-height: 600px; /* Мінімальна висота щоб уникнути стрибків */
+    min-height: 500px;
     position: relative;
 }
 
@@ -151,6 +156,8 @@ body {
     border-bottom: 1px solid #ebeef0;
     cursor: pointer;
     transition: background-color 0.1s;
+    animation: slideIn 0.3s ease-out;
+    will-change: transform, opacity;
 }
 
 .publication-wrapper:hover {
@@ -195,21 +202,6 @@ body {
     gap: 20px;
 }
 
-.publications-container {
-    min-height: 400px;
-}
-
-/* Футер завжди внизу */
-.site-footer {
-    margin-top: auto;
-    flex-shrink: 0;
-}
-
-/* Плавна анімація при додаванні постів */
-.publication-wrapper {
-    animation: slideIn 0.3s ease-out;
-}
-
 @keyframes slideIn {
     from {
         opacity: 0;
@@ -221,8 +213,25 @@ body {
     }
 }
 
+/* ========== LOADING STATES ========== */
+.loading-spinner {
+    padding: 20px;
+    display: none;
+    text-align: center;
+    position: relative;
+    min-height: 80px;
+}
 
-/* Додаємо skeleton placeholder */
+.loading-spinner.active {
+    display: block;
+}
+
+.loading-spinner p {
+    margin: 0 0 10px 0;
+    color: #5b7083;
+    font-size: 14px;
+}
+
 .loading-spinner.active::after {
     content: '';
     display: block;
@@ -237,7 +246,8 @@ body {
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite linear;
     border-radius: 12px;
-    margin: 10px 15px;
+    margin: 10px auto;
+    max-width: 95%;
 }
 
 @keyframes shimmer {
@@ -251,29 +261,16 @@ body {
 
 /* Empty state */
 .empty-feed {
-    min-height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-
-.loading-spinner {
-    padding: 20px;
-    display: none;
-}
-
-.loading-spinner.active {
-    display: block;
-}
-
-.loading-spinner p {
-    margin: 0 0 10px 0;
+    min-height: 300px;
     color: #5b7083;
-    font-size: 14px;
+    font-size: 16px;
+    text-align: center;
+    padding: 40px 20px;
+    flex: 1;
 }
-
-
 
 /* ========== КОМЕНТАРІ ========== */
 .comment-section-wrapper {
@@ -316,6 +313,7 @@ body {
     top: 0;
     height: fit-content;
     align-self: flex-start;
+    z-index: 5;
 }
 
 .trends-block {
@@ -488,134 +486,6 @@ body {
     border-bottom: none;
 }
 
-/* ========== АДАПТИВНІСТЬ ========== */
-@media (max-width: 768px) {
-    .container {
-        flex-direction: column;
-    }
-    
-    .sidebar-left {
-        width: 100%;
-        padding: 10px;
-        position: static;
-        background-color: #ffffff;
-        border-bottom: 1px solid #ebeef0;
-        order: 1;
-    }
-    
-    .sidebar-left nav {
-        display: flex;
-        justify-content: space-around;
-        overflow-x: auto;
-    }
-    
-    .sidebar-left nav a {
-        flex-direction: column;
-        padding: 8px;
-        margin-bottom: 0;
-        font-size: 12px;
-        min-width: 60px;
-    }
-    
-    .sidebar-left nav a span {
-        margin-left: 0;
-        margin-top: 4px;
-        font-size: 11px;
-    }
-    
-    .sidebar-left .post-button {
-        display: none !important;
-    }
-    
-    .main-content {
-        max-width: 100%;
-        border-left: none;
-        border-right: none;
-        order: 2;
-        flex: 1;
-    }
-    
-    .feed-tab {
-        padding: 12px 8px;
-        font-size: 14px;
-    }
-    
-    .publication-wrapper {
-        padding: 10px 12px;
-    }
-    
-    .post-author {
-        font-size: 14px;
-    }
-    
-    .post-handle {
-        font-size: 13px;
-    }
-    
-    .post-text {
-        font-size: 14px;
-    }
-    
-    .post-stats {
-        font-size: 13px;
-        gap: 15px;
-    }
-    
-    .user-avatar {
-        width: 28px;
-        height: 28px;
-        font-size: 12px;
-        margin-right: 6px;
-    }
-    
-    .comment-avatar {
-        width: 20px;
-        height: 20px;
-        font-size: 10px;
-        margin-right: 4px;
-    }
-    
-    .sidebar-right {
-        display: none;
-    }
-    
-    .new-post-form {
-        padding: 12px;
-    }
-    
-    .post-textarea {
-        font-size: 16px;
-    }
-    
-    .comment-section-wrapper {
-        padding-left: 10px;
-    }
-    
-    .comment-item {
-        padding: 8px 10px;
-        font-size: 13px;
-    }
-    
-    .pag-button {
-        padding: 12px 28px;
-        font-size: 15px;
-        min-width: 140px;
-        float: none;
-        width: 100%;
-        max-width: 300px;
-        display: block;
-        margin: 0 auto;
-    }
-}
-
-@media (max-width: 480px) {
-    .pag-button {
-        padding: 10px 22px;
-        font-size: 14px;
-        min-width: 120px;
-    }
-}
-
 /* ========== ФУТЕР ========== */
 .site-footer {
     background: #ffffff;
@@ -624,6 +494,9 @@ body {
     border-top: 1px solid #ebeef0;
     margin-top: auto;
     box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.03);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
 }
 
 .footer-container {
@@ -841,114 +714,6 @@ body {
     pointer-events: none;
 }
 
-/* Стилі для іконок соцмереж */
-.social-icon svg {
-    width: 16px;
-    height: 16px;
-}
-
-/* Адаптивність футера */
-@media (max-width: 1024px) {
-    .footer-container {
-        gap: 30px;
-    }
-    
-    .footer-section {
-        min-width: 180px;
-    }
-    
-    .subscribe-form {
-        max-width: 250px;
-    }
-}
-
-@media (max-width: 768px) {
-    .site-footer {
-        padding: 30px 0 0;
-    }
-    
-    .footer-container {
-        flex-direction: column;
-        gap: 25px;
-        padding: 0 15px;
-    }
-    
-    .footer-section {
-        min-width: 100%;
-        margin-bottom: 20px;
-    }
-    
-    .footer-heading {
-        font-size: 15px;
-        margin-bottom: 15px;
-    }
-    
-    .footer-links a {
-        font-size: 13px;
-    }
-    
-    .social-icons {
-        gap: 10px;
-    }
-    
-    .social-icon {
-        width: 34px;
-        height: 34px;
-    }
-    
-    .subscribe-form {
-        max-width: 100%;
-    }
-    
-    .footer-bottom-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 15px;
-    }
-    
-    .language-select {
-        padding: 6px 25px 6px 10px;
-        font-size: 12px;
-    }
-    
-    .copyright p {
-        font-size: 12px;
-    }
-    
-    .footer-logo .logo-text {
-        font-size: 18px;
-    }
-}
-
-@media (max-width: 480px) {
-    .site-footer {
-        padding: 25px 0 0;
-    }
-    
-    .footer-heading {
-        font-size: 14px;
-    }
-    
-    .footer-links li {
-        margin-bottom: 8px;
-    }
-    
-    .social-icon {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .subscribe-button {
-        padding: 9px 14px;
-        font-size: 12px;
-    }
-    
-    .subscribe-input {
-        padding: 9px 12px;
-        font-size: 12px;
-    }
-}
-
 /* Анімації */
 @keyframes fadeInUp {
     from {
@@ -965,89 +730,357 @@ body {
     animation: fadeInUp 0.4s ease-out;
 }
 
-.footer-section {
-    animation: fadeInUp 0.6s ease-out;
-    animation-fill-mode: both;
+/* ========== АДАПТИВНІСТЬ ========== */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    
+    .sidebar-left {
+        width: 100%;
+        padding: 10px;
+        position: static;
+        background-color: #ffffff;
+        border-bottom: 1px solid #ebeef0;
+        order: 1;
+    }
+    
+    .sidebar-left nav {
+        display: flex;
+        justify-content: space-around;
+        overflow-x: auto;
+    }
+    
+    .sidebar-left nav a {
+        flex-direction: column;
+        padding: 8px;
+        margin-bottom: 0;
+        font-size: 12px;
+        min-width: 60px;
+    }
+    
+    .sidebar-left nav a span {
+        margin-left: 0;
+        margin-top: 4px;
+        font-size: 11px;
+    }
+    
+    .sidebar-left .post-button {
+        display: none !important;
+    }
+    
+    .main-content {
+        max-width: 100%;
+        border-left: none;
+        border-right: none;
+        order: 2;
+        flex: 1;
+        min-height: calc(100vh - 180px);
+    }
+    
+    .feed-tab {
+        padding: 12px 8px;
+        font-size: 14px;
+    }
+    
+    .publication-wrapper {
+        padding: 10px 12px;
+    }
+    
+    .post-author {
+        font-size: 14px;
+    }
+    
+    .post-handle {
+        font-size: 13px;
+    }
+    
+    .post-text {
+        font-size: 14px;
+    }
+    
+    .post-stats {
+        font-size: 13px;
+        gap: 15px;
+    }
+    
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+        margin-right: 6px;
+    }
+    
+    .comment-avatar {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+        margin-right: 4px;
+    }
+    
+    .sidebar-right {
+        display: none;
+    }
+    
+    .new-post-form {
+        padding: 12px;
+    }
+    
+    .post-textarea {
+        font-size: 16px;
+    }
+    
+    .comment-section-wrapper {
+        padding-left: 10px;
+    }
+    
+    .comment-item {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+    
+    .pag-button {
+        padding: 12px 28px;
+        font-size: 15px;
+        min-width: 140px;
+        float: none;
+        width: 100%;
+        max-width: 300px;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .footer-container {
+        flex-direction: column;
+        gap: 25px;
+        padding: 0 15px;
+    }
+    
+    .footer-section {
+        min-width: 100%;
+        margin-bottom: 20px;
+    }
 }
 
-.footer-section:nth-child(1) { animation-delay: 0.1s; }
-.footer-section:nth-child(2) { animation-delay: 0.15s; }
-.footer-section:nth-child(3) { animation-delay: 0.2s; }
-.footer-section:nth-child(4) { animation-delay: 0.25s; }
+@media (max-width: 480px) {
+    .pag-button {
+        padding: 10px 22px;
+        font-size: 14px;
+        min-width: 120px;
+    }
+    
+    .publications-container {
+        min-height: 400px;
+    }
+    
+    .loading-spinner.active::after {
+        height: 100px;
+        margin: 10px;
+    }
+}
 
-/* Ховер-ефекти для кращої інтерактивності */
-.footer-links a::after {
+/* ========== ОСОБЛИВО ВАЖЛИВІ СТИЛІ ДЛЯ БЕСКІНЕЧНОГО СКРОЛУ ========== */
+/* Гарантуємо, що body має правильну висоту */
+html {
+    height: 100%;
+}
+
+/* Основний контейнер займає всю доступну висоту */
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Головний контент росте і займає доступний простір */
+.container {
+    flex: 1 0 auto;
+    display: flex;
+}
+
+/* Футер завжди внизу */
+.site-footer {
+    flex-shrink: 0;
+}
+
+/* Забезпечуємо плавне завантаження контенту */
+.publications-container {
+    position: relative;
+    transition: min-height 0.3s ease;
+}
+
+/* Плавний перехід між фідами */
+.feed-content {
+    transition: opacity 0.2s ease;
+}
+
+/* Запобігаємо миготінню при перемиканні */
+.feed-content:not(.active) {
+    display: none !important;
+}
+
+
+
+* Фіксуємо мінімальну висоту для контенту */
+.main-content {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+}
+
+.feed-content {
+    flex: 1;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.feed-content.active {
+    display: flex;
+}
+
+.publications-container {
+    flex: 1;
+    min-height: 400px;
+}
+
+.loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    color: #5b7083;
+    position: relative;
+    min-height: 60px;
+}
+
+.loading-spinner.active {
+    display: block;
+}
+
+/* Кнопка завантаження ще */
+.load-more-btn-container {
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid #ebeef0;
+    background: #ffffff;
+}
+
+.load-more-btn {
+    background: linear-gradient(135deg, #1da1f2 0%, #0d8bd9 100%);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 9999px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    min-width: 200px;
+}
+
+.load-more-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(29, 161, 242, 0.3);
+}
+
+.load-more-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.load-more-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.load-more-btn.loading::after {
     content: '';
     position: absolute;
-    width: 0;
-    height: 1px;
-    bottom: 0;
-    left: 0;
-    background-color: #1da1f2;
-    transition: width 0.3s ease;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
 
-.footer-links a:hover::after {
-    width: 100%;
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
-.footer-links li {
-    position: relative;
+/* Skeleton loader */
+.loading-spinner::after {
+    content: '';
+    display: none;
+    width: calc(100% - 40px);
+    height: 100px;
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 25%,
+        #e0e0e0 50%,
+        #f0f0f0 75%
+    );
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 8px;
+    margin: 10px auto 0;
 }
 
-/* Стиль для активної посилання (якщо потрібно) */
-.footer-links a.active {
-    color: #1da1f2;
-    font-weight: 500;
+.loading-spinner.active::after {
+    display: block;
 }
 
-/* Покращений фокус для доступності */
-.subscribe-input:focus,
-.language-select:focus,
-.subscribe-button:focus {
-    outline: 2px solid rgba(29, 161, 242, 0.3);
-    outline-offset: 2px;
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
 }
 
-/* Мінімальні стилі для консистентності з основним дизайном */
-.site-footer a,
-.site-footer button {
-    font-family: 'Inter', sans-serif;
+/* Плавна поява нового контенту */
+.publication-wrapper {
+    animation: fadeIn 0.3s ease-in;
 }
 
-.site-footer * {
-    box-sizing: border-box;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* Легка тінь при скролі (опціонально) */
-.site-footer.scrolled {
-    box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.05);
-    transition: box-shadow 0.3s ease;
+/* Підрахунок завантажених постів */
+.posts-counter {
+    text-align: center;
+    padding: 10px;
+    font-size: 13px;
+    color: #5b7083;
+    border-top: 1px solid #ebeef0;
+    background: #fafafa;
 }
 
-
-/* ========== АДАПТИВНІСТЬ ДЛЯ AJAX ========== */
+/* Адаптація для мобілки */
 @media (max-width: 768px) {
     .main-content {
-        min-height: calc(100vh - 200px);
+        min-height: calc(100vh - 150px);
     }
     
     .feed-content {
         min-height: 400px;
     }
     
-    .publications-container {
-        min-height: 300px;
-    }
-}
-
-@media (max-width: 480px) {
-    .feed-content {
-        min-height: 350px;
-    }
-    
-    .loading-spinner.active::after {
-        height: 100px;
-        margin: 10px;
+    .load-more-btn {
+        min-width: 160px;
+        padding: 10px 24px;
+        font-size: 14px;
     }
 }

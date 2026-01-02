@@ -106,7 +106,7 @@ def home_page(request):
         feed_type = request.GET.get('feed_type', 'feed1')
         
         if feed_type == 'feed1':
-            html = render_to_string('feed/partials/publication_list.html', {
+            html = render_to_string('feed/modal_parts/publication_list.html', {
                 'publications': page_publications,
                 'request': request
             })
@@ -115,7 +115,7 @@ def home_page(request):
                 'has_more': len(page_publications) == 10
             })
         else:
-            html = render_to_string('feed/partials/publication_list.html', {
+            html = render_to_string('feed/modal_parts/publication_list.html', {
                 'publications': page_explores,
                 'request': request
             })
