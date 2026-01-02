@@ -303,69 +303,6 @@
                         method: "POST",
                         headers: {
                             "X-CSRFToken": "{{ csrf_token }}",
-<<<<<<< HEAD
-                            "X-Requested-With": "XMLHttpRequest"
-                        }
-                    });
-                    const data = await response.json();
-                    btn.querySelector('.like-count').textContent = data.likes;
-                });
-            });
-
-            // --- ПОШУК ---
-            const searchToggle = document.getElementById('search-toggle');
-            const searchModal = document.getElementById('search-modal');
-            const searchClose = document.getElementById('search-close');
-            const searchInput = document.getElementById('search-input');
-
-            if (searchToggle) {
-                searchToggle.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    searchModal.classList.remove('hidden');
-                    searchInput.focus();
-                });
-            }
-
-            if (searchClose) {
-                searchClose.addEventListener('click', () => {
-                    searchModal.classList.add('hidden');
-                    searchInput.value = '';
-                });
-            }
-
-            if (searchModal) {
-                searchModal.addEventListener('click', (e) => {
-                    if (e.target === searchModal) {
-                        searchModal.classList.add('hidden');
-                        searchInput.value = '';
-                    }
-                });
-            }
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && searchModal && !searchModal.classList.contains('hidden')) {
-                    searchModal.classList.add('hidden');
-                    searchInput.value = '';
-                }
-            });
-
-            if (searchInput) {
-                searchInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const searchQuery = searchInput.value.trim();
-                        if (searchQuery) {
-                            const baseUrl = window.location.origin;
-                            window.location.href = `${baseUrl}/search/${encodeURIComponent(searchQuery)}/`;
-                        }
-                    }
-                });
-            }
-        });
-    </script>
-</body>
-</html>
-=======
                             "Content-Type": "application/json",
                             "X-Requested-With": "XMLHttpRequest"
                         }
@@ -446,4 +383,3 @@
 })();
 </script>
 {% endblock %}
->>>>>>> refactor/optimization
