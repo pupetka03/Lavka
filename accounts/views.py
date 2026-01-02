@@ -14,6 +14,9 @@ import json
 from django.views.decorators.cache import cache_page
 from django.http import HttpResponseBadRequest
 
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+
 
 
 
@@ -71,51 +74,72 @@ def out(request):
 
 # ====== For User Interaction ==========
 #@cache_page(60)
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+
 def home_page(request):
-    #інфа якщо користувач не залогінений
     if not request.user.is_authenticated:
         likes = Like.objects.all()
-        publication = get_popular_feed()
+        publication = get_popular_feed()[:10]  # Перші 10
         tag_info = list(tegs_feed_popular())
         tags = Tag.objects.filter(name__in=tag_info)
-
         context = {
-            "tags":tags,
-            "publication":publication,
-            "likes":likes,
+            "tags": tags,
+            "publication": publication,
+            "likes": likes,
         }
         return render(request, "feed/home_page.html", context=context)
     
-
-    
-    
-    #якщо залогінений
-    publication = get_feed_for_user(request.user)
-    likes = Like.objects.all()
-    
-    #вивід популярних тегів
-    tag_info = list(tegs_feed_popular())
-    tags = Tag.objects.filter(name__in=tag_info)
-
-    #другий фід
-    explore_publications = get_exploration_feed_for_user(request.user)
-    
+    # Для залогінених
     page_feed = int(request.GET.get("page_feed", 0))
     page_explore = int(request.GET.get("page_explore", 0))
-
+    
+    publication = get_feed_for_user(request.user)
+    explore_publications = get_exploration_feed_for_user(request.user)
+    
+    # Пагінація
     page_publications = paginator(publication, page_feed, 10)
     page_explores = paginator(explore_publications, page_explore, 10)
-
-
+    
+    # Якщо це AJAX запит - повертаємо JSON
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        feed_type = request.GET.get('feed_type', 'feed1')
+        
+        if feed_type == 'feed1':
+            html = render_to_string('feed/partials/publication_list.html', {
+                'publications': page_publications,
+                'request': request
+            })
+            return JsonResponse({
+                'html': html,
+                'has_more': len(page_publications) == 10
+            })
+        else:
+            html = render_to_string('feed/partials/publication_list.html', {
+                'publications': page_explores,
+                'request': request
+            })
+            return JsonResponse({
+                'html': html,
+                'has_more': len(page_explores) == 10
+            })
+    
+    # Звичайний запит
+    likes = Like.objects.all()
+    tag_info = list(tegs_feed_popular())
+    tags = Tag.objects.filter(name__in=tag_info)
+    
     context = {
-        "publication":page_publications,
-        "explore_publications":page_explores,
-        "likes":likes, "tags":tags,
-        "page_feed":page_feed,
-        "page_explore":page_explore,
-
-        }
+        "publication": page_publications,
+        "explore_publications": page_explores,
+        "likes": likes,
+        "tags": tags,
+        "page_feed": page_feed,
+        "page_explore": page_explore,
+    }
     return render(request, "feed/home_page.html", context=context)
+
+
 
 def create_post_page(request):
     tag_info = list(tegs_feed_popular())
