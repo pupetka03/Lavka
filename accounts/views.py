@@ -93,12 +93,9 @@ def home_page(request):
     page_feed = int(request.GET.get("page_feed", 0))
     page_explore = int(request.GET.get("page_explore", 0))
     
-    publication = get_feed_for_user(request.user)
-    explore_publications = get_exploration_feed_for_user(request.user)
-    
-    # Пагінація
-    page_publications = paginator(publication, page_feed, 10)
-    page_explores = paginator(explore_publications, page_explore, 10)
+    page_publications = get_feed_for_user(request.user, page=page_feed)
+    page_explores = get_exploration_feed_for_user(request.user, page=page_explore)
+
     
     # Якщо це AJAX запит - повертаємо JSON
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
