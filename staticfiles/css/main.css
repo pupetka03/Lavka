@@ -1,0 +1,1086 @@
+/* ========== БАЗОВІ СТИЛІ ========== */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: #f7f9f9;
+    color: #1a1a1a;
+    overflow-x: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ========== ОСНОВНИЙ КОНТЕЙНЕР ========== */
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* Контейнер макету */
+.container {
+    display: flex;
+    flex: 1;
+    max-width: 1300px;
+    margin: 0 auto;
+    width: 100%;
+    min-height: calc(100vh - 200px); /* Враховуємо футер */
+}
+
+/* ========== ЛІВА БОКОВА ПАНЕЛЬ ========== */
+.sidebar-left {
+    width: 250px;
+    padding: 20px 30px 20px 0;
+    position: sticky;
+    top: 0;
+    height: fit-content;
+    align-self: flex-start;
+    z-index: 5;
+}
+
+.sidebar-left nav a {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: #1a1a1a;
+    font-size: 18px;
+    font-weight: 500;
+    border-radius: 9999px;
+    transition: background-color 0.2s;
+}
+
+.sidebar-left nav a:hover {
+    background-color: #e6e6e6;
+}
+
+.sidebar-left nav a span {
+    margin-left: 15px;
+}
+
+/* ========== ЦЕНТРАЛЬНА КОЛОНКА ========== */
+.main-content {
+    flex: 1;
+    max-width: 600px;
+    min-width: 0; /* Важливо для flexbox */
+    border-left: 1px solid #ebeef0;
+    border-right: 1px solid #ebeef0;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Стилі для перемикача фідів */
+.feed-switcher {
+    display: flex;
+    background-color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #ebeef0;
+}
+
+.feed-tab {
+    flex: 1;
+    text-align: center;
+    padding: 15px 10px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.feed-tab:hover {
+    background-color: #f7f7f7;
+}
+
+.feed-tab.active {
+    border-bottom-color: #1da1f2;
+    color: #1da1f2;
+}
+
+.feed-content {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+}
+
+.feed-content.active {
+    display: flex;
+}
+
+/* Контейнер для публікацій */
+.publications-container {
+    flex: 1;
+    min-height: 500px;
+    position: relative;
+}
+
+/* ========== АВАТАРКИ ========== */
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1da1f2, #794bc4);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    margin-right: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.comment-avatar {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    margin-right: 6px;
+}
+
+/* ========== ПУБЛІКАЦІЇ ========== */
+.publication-wrapper {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ebeef0;
+    cursor: pointer;
+    transition: background-color 0.1s;
+    animation: slideIn 0.3s ease-out;
+    will-change: transform, opacity;
+}
+
+.publication-wrapper:hover {
+    background-color: #f7f7f7;
+}
+
+.post-author {
+    font-weight: bold;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.post-handle {
+    color: #5b7083;
+    margin-left: 5px;
+    font-size: 14px;
+}
+
+.post-text {
+    font-size: 15px;
+    line-height: 1.4;
+    margin: 8px 0;
+    word-break: break-word;
+}
+
+.post-tags {
+    margin: 8px 0;
+}
+
+.tag {
+    color: #1da1f2;
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+.post-stats {
+    color: #5b7083;
+    font-size: 14px;
+    margin-top: 10px;
+    display: flex;
+    gap: 20px;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== LOADING STATES ========== */
+.loading-spinner {
+    padding: 20px;
+    display: none;
+    text-align: center;
+    position: relative;
+    min-height: 80px;
+}
+
+.loading-spinner.active {
+    display: block;
+}
+
+.loading-spinner p {
+    margin: 0 0 10px 0;
+    color: #5b7083;
+    font-size: 14px;
+}
+
+.loading-spinner.active::after {
+    content: '';
+    display: block;
+    height: 120px;
+    background: linear-gradient(
+        90deg,
+        #f5f5f5 0%,
+        #e0e0e0 20%,
+        #f5f5f5 40%,
+        #f5f5f5 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 12px;
+    margin: 10px auto;
+    max-width: 95%;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Empty state */
+.empty-feed {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    color: #5b7083;
+    font-size: 16px;
+    text-align: center;
+    padding: 40px 20px;
+    flex: 1;
+}
+
+/* ========== КОМЕНТАРІ ========== */
+.comment-section-wrapper {
+    padding-top: 5px;
+    padding-left: 15px;
+}
+
+.comment-item {
+    padding: 10px 12px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-left: 3px solid #e0e0e0;
+    background-color: #fafafa;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: background-color 0.1s;
+}
+
+.comment-item:hover {
+    background-color: #f2f2f2;
+}
+
+.comment-text {
+    margin-top: 3px;
+    line-height: 1.3;
+}
+
+.comment-author {
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+}
+
+/* ========== ПРАВА БОКОВА ПАНЕЛЬ ========== */
+.sidebar-right {
+    width: 350px;
+    padding: 20px 0 20px 30px;
+    position: sticky;
+    top: 0;
+    height: fit-content;
+    align-self: flex-start;
+    z-index: 5;
+}
+
+.trends-block {
+    background-color: #eff3f4;
+    border-radius: 16px;
+    padding: 10px 0;
+    margin-bottom: 15px;
+}
+
+.trends-block h3 {
+    font-size: 19px;
+    padding: 0 15px 10px;
+    margin: 0;
+}
+
+.trend-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+.trend-item:hover {
+    background-color: #e6e6e6;
+}
+
+.trend-category {
+    font-size: 13px;
+    color: #5b7083;
+}
+
+.trend-name {
+    font-weight: bold;
+    font-size: 15px;
+    color: #1a1a1a;
+}
+
+/* ========== КНОПКИ ТА ФОРМИ ========== */
+.new-post-form {
+    padding: 15px;
+    border-bottom: 10px solid #ebeef0;
+}
+
+.post-textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    resize: none;
+    min-height: 50px;
+    padding: 10px 0;
+    box-sizing: border-box;
+    background-color: transparent;
+}
+
+.post-button {
+    background-color: #1da1f2;
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 9999px;
+    font-weight: bold;
+    cursor: pointer;
+    float: right;
+    transition: background-color 0.2s;
+    font-size: 14px;
+}
+
+.post-button:hover {
+    background-color: #0c85d0;
+}
+
+/* ========== ПАГІНАЦІЯ ========== */
+.pagination {
+    padding: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.pag-button {
+    background: linear-gradient(135deg, #1da1f2 0%, #0d8bd9 100%);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 9999px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 14px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    box-shadow: 0 4px 12px rgba(29, 161, 242, 0.3);
+    letter-spacing: 0.3px;
+    min-width: 120px;
+    text-transform: uppercase;
+}
+
+.pag-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent);
+    transition: left 0.6s ease;
+    z-index: 1;
+}
+
+.pag-button:hover::before {
+    left: 100%;
+}
+
+.pag-button:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 8px rgba(29, 161, 242, 0.3);
+    transition: all 0.1s ease;
+}
+
+.pag-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.4), 
+                0 4px 12px rgba(29, 161, 242, 0.3);
+}
+
+/* ========== ПОШУК ========== */
+#search-modal {
+    backdrop-filter: blur(5px);
+}
+
+#search-input {
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+#search-results {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 transparent;
+}
+
+#search-results::-webkit-scrollbar {
+    width: 6px;
+}
+
+#search-results::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#search-results::-webkit-scrollbar-thumb {
+    background-color: #cbd5e0;
+    border-radius: 3px;
+}
+
+.search-result-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+    background-color: #f8fafc;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+/* ========== ФУТЕР ========== */
+.site-footer {
+    background: #ffffff;
+    color: #1a1a1a;
+    padding: 40px 0 0;
+    border-top: 1px solid #ebeef0;
+    margin-top: auto;
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.03);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.footer-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px;
+    gap: 40px;
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 30px;
+}
+
+.footer-heading {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #1a1a1a;
+    position: relative;
+    padding-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+.footer-heading::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(90deg, #1da1f2, #794bc4);
+    border-radius: 1px;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 10px;
+}
+
+.footer-links a {
+    color: #5b7083;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    display: inline-block;
+    padding: 3px 0;
+}
+
+.footer-links a:hover {
+    color: #1da1f2;
+    transform: translateX(3px);
+}
+
+.footer-text {
+    color: #5b7083;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    opacity: 0.8;
+}
+
+/* Соціальні іконки */
+.social-icons {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: #f7f9f9;
+    border-radius: 50%;
+    color: #5b7083;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid #ebeef0;
+}
+
+.social-icon:hover {
+    background: linear-gradient(135deg, #1da1f2, #794bc4);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(29, 161, 242, 0.15);
+    border-color: transparent;
+}
+
+/* Форма підписки */
+.subscribe-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 280px;
+}
+
+.subscribe-input {
+    padding: 10px 15px;
+    border: 1px solid #d1d9e0;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1a1a1a;
+    font-size: 13px;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.subscribe-input:focus {
+    outline: none;
+    border-color: #1da1f2;
+    box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.1);
+}
+
+.subscribe-input::placeholder {
+    color: #8899a6;
+}
+
+.subscribe-button {
+    padding: 10px 16px;
+    background: #1da1f2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+}
+
+.subscribe-button:hover {
+    background: #0c85d0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(29, 161, 242, 0.2);
+}
+
+/* Нижня частина футера */
+.footer-bottom {
+    background: #f7f9f9;
+    padding: 20px 0;
+    margin-top: 40px;
+    border-top: 1px solid #ebeef0;
+}
+
+.footer-bottom-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.copyright p {
+    color: #5b7083;
+    font-size: 13px;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.footer-logo .logo-text {
+    font-size: 20px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #1da1f2, #794bc4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.language-selector {
+    position: relative;
+}
+
+.language-select {
+    padding: 6px 30px 6px 12px;
+    background: #ffffff;
+    border: 1px solid #d1d9e0;
+    border-radius: 6px;
+    color: #1a1a1a;
+    font-size: 13px;
+    cursor: pointer;
+    appearance: none;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.language-select:focus {
+    outline: none;
+    border-color: #1da1f2;
+    box-shadow: 0 0 0 2px rgba(29, 161, 242, 0.1);
+}
+
+.language-selector::after {
+    content: '▼';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #5b7083;
+    font-size: 9px;
+    pointer-events: none;
+}
+
+/* Анімації */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.site-footer {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+/* ========== АДАПТИВНІСТЬ ========== */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    
+    .sidebar-left {
+        width: 100%;
+        padding: 10px;
+        position: static;
+        background-color: #ffffff;
+        border-bottom: 1px solid #ebeef0;
+        order: 1;
+    }
+    
+    .sidebar-left nav {
+        display: flex;
+        justify-content: space-around;
+        overflow-x: auto;
+    }
+    
+    .sidebar-left nav a {
+        flex-direction: column;
+        padding: 8px;
+        margin-bottom: 0;
+        font-size: 12px;
+        min-width: 60px;
+    }
+    
+    .sidebar-left nav a span {
+        margin-left: 0;
+        margin-top: 4px;
+        font-size: 11px;
+    }
+    
+    .sidebar-left .post-button {
+        display: none !important;
+    }
+    
+    .main-content {
+        max-width: 100%;
+        border-left: none;
+        border-right: none;
+        order: 2;
+        flex: 1;
+        min-height: calc(100vh - 180px);
+    }
+    
+    .feed-tab {
+        padding: 12px 8px;
+        font-size: 14px;
+    }
+    
+    .publication-wrapper {
+        padding: 10px 12px;
+    }
+    
+    .post-author {
+        font-size: 14px;
+    }
+    
+    .post-handle {
+        font-size: 13px;
+    }
+    
+    .post-text {
+        font-size: 14px;
+    }
+    
+    .post-stats {
+        font-size: 13px;
+        gap: 15px;
+    }
+    
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+        margin-right: 6px;
+    }
+    
+    .comment-avatar {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+        margin-right: 4px;
+    }
+    
+    .sidebar-right {
+        display: none;
+    }
+    
+    .new-post-form {
+        padding: 12px;
+    }
+    
+    .post-textarea {
+        font-size: 16px;
+    }
+    
+    .comment-section-wrapper {
+        padding-left: 10px;
+    }
+    
+    .comment-item {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+    
+    .pag-button {
+        padding: 12px 28px;
+        font-size: 15px;
+        min-width: 140px;
+        float: none;
+        width: 100%;
+        max-width: 300px;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .footer-container {
+        flex-direction: column;
+        gap: 25px;
+        padding: 0 15px;
+    }
+    
+    .footer-section {
+        min-width: 100%;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pag-button {
+        padding: 10px 22px;
+        font-size: 14px;
+        min-width: 120px;
+    }
+    
+    .publications-container {
+        min-height: 400px;
+    }
+    
+    .loading-spinner.active::after {
+        height: 100px;
+        margin: 10px;
+    }
+}
+
+/* ========== ОСОБЛИВО ВАЖЛИВІ СТИЛІ ДЛЯ БЕСКІНЕЧНОГО СКРОЛУ ========== */
+/* Гарантуємо, що body має правильну висоту */
+html {
+    height: 100%;
+}
+
+/* Основний контейнер займає всю доступну висоту */
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Головний контент росте і займає доступний простір */
+.container {
+    flex: 1 0 auto;
+    display: flex;
+}
+
+/* Футер завжди внизу */
+.site-footer {
+    flex-shrink: 0;
+}
+
+/* Забезпечуємо плавне завантаження контенту */
+.publications-container {
+    position: relative;
+    transition: min-height 0.3s ease;
+}
+
+/* Плавний перехід між фідами */
+.feed-content {
+    transition: opacity 0.2s ease;
+}
+
+/* Запобігаємо миготінню при перемиканні */
+.feed-content:not(.active) {
+    display: none !important;
+}
+
+
+
+* Фіксуємо мінімальну висоту для контенту */
+.main-content {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+}
+
+.feed-content {
+    flex: 1;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.feed-content.active {
+    display: flex;
+}
+
+.publications-container {
+    flex: 1;
+    min-height: 400px;
+}
+
+.loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    color: #5b7083;
+    position: relative;
+    min-height: 60px;
+}
+
+.loading-spinner.active {
+    display: block;
+}
+
+/* Кнопка завантаження ще */
+.load-more-btn-container {
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid #ebeef0;
+    background: #ffffff;
+}
+
+.load-more-btn {
+    background: linear-gradient(135deg, #1da1f2 0%, #0d8bd9 100%);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 9999px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    min-width: 200px;
+}
+
+.load-more-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(29, 161, 242, 0.3);
+}
+
+.load-more-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.load-more-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.load-more-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Skeleton loader */
+.loading-spinner::after {
+    content: '';
+    display: none;
+    width: calc(100% - 40px);
+    height: 100px;
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 25%,
+        #e0e0e0 50%,
+        #f0f0f0 75%
+    );
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 8px;
+    margin: 10px auto 0;
+}
+
+.loading-spinner.active::after {
+    display: block;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Плавна поява нового контенту */
+.publication-wrapper {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Підрахунок завантажених постів */
+.posts-counter {
+    text-align: center;
+    padding: 10px;
+    font-size: 13px;
+    color: #5b7083;
+    border-top: 1px solid #ebeef0;
+    background: #fafafa;
+}
+
+/* Адаптація для мобілки */
+@media (max-width: 768px) {
+    .main-content {
+        min-height: calc(100vh - 150px);
+    }
+    
+    .feed-content {
+        min-height: 400px;
+    }
+    
+    .load-more-btn {
+        min-width: 160px;
+        padding: 10px 24px;
+        font-size: 14px;
+    }
+}

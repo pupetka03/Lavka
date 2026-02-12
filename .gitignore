@@ -13,7 +13,7 @@ env/
 # Django stuff
 db.sqlite3
 media/
-staticfiles/
+
 
 # Environment files (ВАЖЛИВО)
 .env

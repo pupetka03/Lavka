@@ -1,0 +1,416 @@
+/* ------------------------------------------------------------------- */
+/* ОСНОВНА СТРУКТУРА ПУБЛІКАЦІЇ (КОМПАКТНА ВЕРСІЯ ДЛЯ ПК) */
+/* ------------------------------------------------------------------- */
+.publication-wrapper {
+    border: 1px solid #E1E8ED;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background-color: #FFFFFF;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.publication-wrapper:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-color: #CCD6DD;
+}
+
+/* ------------------------------------------------------------------- */
+/* ЗАГОЛОВОК ПУБЛІКАЦІЇ */
+/* ------------------------------------------------------------------- */
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.post-author-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.author-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1DA1F2, #794BC4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.author-details {
+    flex: 1;
+}
+
+.post-author {
+    font-weight: 700;
+    color: #14171A;
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+.post-handle {
+    font-weight: 400;
+    color: #657786;
+    font-size: 13px;
+}
+
+.post-time {
+    color: #657786;
+    font-size: 12px;
+    margin-top: 1px;
+}
+
+.post-actions {
+    position: relative;
+}
+
+.more-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #657786;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+
+.more-btn:hover {
+    background-color: #F7F9FA;
+    color: #1DA1F2;
+}
+
+/* ------------------------------------------------------------------- */
+/* ТЕКСТ ПУБЛІКАЦІЇ */
+/* ------------------------------------------------------------------- */
+.post-text {
+    margin: 10px 0;
+    line-height: 1.5;
+    color: #14171A;
+    font-size: 14px;
+    word-wrap: break-word;
+}
+
+/* ------------------------------------------------------------------- */
+/* ТЕГИ */
+/* ------------------------------------------------------------------- */
+.post-tags {
+    margin: 10px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tag {
+    color: #1DA1F2;
+    font-size: 12px;
+    padding: 3px 6px;
+    background-color: #F7F9FA;
+    border-radius: 10px;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.tag:hover {
+    background-color: #1DA1F2;
+    color: white;
+}
+
+/* ------------------------------------------------------------------- */
+/* СТАТИСТИКА */
+/* ------------------------------------------------------------------- */
+.post-stats {
+    display: flex;
+    gap: 16px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #F0F3F4;
+}
+
+.stat-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    color: #657786;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: none;
+    border: none;
+}
+
+.stat-link:hover {
+    color: #1DA1F2;
+    background-color: #F7F9FA;
+}
+
+.like-button:hover {
+    color: #E0245E;
+    background-color: #FCE8F0;
+}
+
+.stat-icon {
+    font-size: 14px;
+}
+
+.stat-count {
+    font-weight: 500;
+}
+
+/* ------------------------------------------------------------------- */
+/* КОМЕНТАРІ */
+/* ------------------------------------------------------------------- */
+.comments-container {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #F0F3F4;
+}
+
+.comments-header h4 {
+    margin: 0 0 12px 0;
+    color: #14171A;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.comment-thread {
+    margin-bottom: 12px;
+}
+
+.comment-section-wrapper {
+    padding: 12px;
+    background-color: #F7F9FA;
+    border-radius: 10px;
+    border: 1px solid #E1E8ED;
+    margin-bottom: 6px;
+}
+
+.comment-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.comment-author-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #17BF63, #1DA1F2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+.comment-author-info {
+    flex: 1;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: #14171A;
+    font-size: 13px;
+}
+
+.comment-time {
+    color: #657786;
+    font-size: 11px;
+    margin-left: 6px;
+}
+
+.comment-text {
+    margin: 6px 0;
+    line-height: 1.4;
+    color: #14171A;
+    font-size: 13px;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.reply-btn, .comment-like-btn {
+    background: none;
+    border: none;
+    color: #657786;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 3px 6px;
+    border-radius: 3px;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.reply-btn:hover {
+    color: #1DA1F2;
+    background-color: #E8F5FE;
+}
+
+.comment-like-btn:hover {
+    color: #E0245E;
+    background-color: #FCE8F0;
+}
+
+/* ------------------------------------------------------------------- */
+/* ВІДПОВІДІ */
+/* ------------------------------------------------------------------- */
+.replies-wrapper {
+    margin-left: 36px;
+    margin-top: 6px;
+}
+
+.reply-item {
+    padding: 10px;
+    background-color: #EFF4F7;
+    border-radius: 6px;
+    border-left: 2px solid #1DA1F2;
+    margin-bottom: 4px;
+}
+
+.reply-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.reply-author-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #794BC4, #E0245E);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 9px;
+    flex-shrink: 0;
+}
+
+.reply-author-info {
+    flex: 1;
+}
+
+.reply-author {
+    font-weight: 600;
+    color: #14171A;
+    font-size: 12px;
+}
+
+.reply-time {
+    color: #657786;
+    font-size: 10px;
+    margin-left: 4px;
+}
+
+.reply-text {
+    line-height: 1.3;
+    color: #14171A;
+    font-size: 12px;
+}
+
+.reply-to {
+    color: #1DA1F2;
+    font-weight: 500;
+}
+
+.reply-actions {
+    margin-top: 6px;
+}
+
+.reply-like-btn {
+    background: none;
+    border: none;
+    color: #657786;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 1px 4px;
+    border-radius: 3px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.reply-like-btn:hover {
+    color: #E0245E;
+    background-color: #FCE8F0;
+}
+
+/* ------------------------------------------------------------------- */
+/* АНІМАЦІЇ */
+/* ------------------------------------------------------------------- */
+@keyframes likeAnimation {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+.liked {
+    animation: likeAnimation 0.3s ease;
+    color: #E0245E !important;
+}
+
+/* ------------------------------------------------------------------- */
+/* МОБІЛЬНА ВЕРСІЯ (залишається майже без змін) */
+/* ------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    .publication-wrapper {
+        padding: 12px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+    }
+
+    .post-header {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .post-actions {
+        align-self: flex-end;
+    }
+
+    .post-stats {
+        gap: 10px;
+    }
+
+    .stat-link {
+        padding: 3px 6px;
+        font-size: 12px;
+    }
+
+    .replies-wrapper {
+        margin-left: 20px;
+    }
+
+    .comment-section-wrapper {
+        padding: 10px;
+    }
+
+    .comment-actions {
+        gap: 10px;
+    }
+}
