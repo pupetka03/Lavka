@@ -10,7 +10,7 @@ from django.core.cache import cache
 
 
 
-def get_time_limit(days=1):
+def get_time_limit(days=3):
     return timezone.now() - timedelta(days=days)
 
 

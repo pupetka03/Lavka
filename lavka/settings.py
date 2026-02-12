@@ -11,30 +11,23 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv # Імпорт обов'язковий
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Вказуємо точний шлях до файлу
+load_dotenv(BASE_DIR / '.env') 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Тепер os.environ знайде ваш ключ
+SECRET_KEY = os.environ.get('SECRET_KEY')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret')  # fallback для локалки
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-
-ALLOWED_HOSTS = ["localhost", "192.168.0.212", "147.175.113.158", "ca6b72496f0c.ngrok-free.app"]
-
-CSRF_TRUSTED_ORIGINS = [
-    "https://ca6b72496f0c.ngrok-free.app",
-]
+ALLOWED_HOSTS = ["localhost", "192.168.0.212"]
 
 AUTH_USER_MODEL = 'accounts.User'
+
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Application definition
 
@@ -84,8 +77,12 @@ WSGI_APPLICATION = 'lavka.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get("DB_NAME"),
+        'USER': os.environ.get("DB_USER"),
+        'PASSWORD': os.environ.get("DB_PASS"),
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
