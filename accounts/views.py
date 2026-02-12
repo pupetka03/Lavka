@@ -180,7 +180,7 @@ def like_publication(request, slug):
 
 @require_POST
 @login_required
-#@ratelimit(key='ip', rate='2/m', method='POST', block=True)
+@ratelimit(key='ip', rate='2/m', method='POST', block=True)
 def create_comments(request, slug, parent=None):
     try:
         data = json.loads(request.body)
@@ -224,18 +224,16 @@ def profile(request, username):
     publications = Publication.objects.filter(user=profile_user).order_by('-id')
     likes_publication = Like.objects.filter(user=profile_user).order_by('-created_at')
     coments_user = Comments.objects.filter(user=profile_user).order_by('-created_at')
-
     tag_info = list(tegs_feed_popular())
     tags = Tag.objects.filter(name__in=tag_info)
 
-    
  
     return render(request, 'auth/profile.html', {
+        'tags':tags,
         'profile_user': profile_user,
         'publications': publications,
         'likes_publication': likes_publication,
-        'coments_user':coments_user,
-        'tags':tags,
+        'coments_user':coments_user
     })
 
 

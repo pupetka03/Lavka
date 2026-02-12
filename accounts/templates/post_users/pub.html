@@ -27,7 +27,14 @@
                                 {{ pub.user.username|first|upper }}
                             </div>
                             <div class="author-details">
-                                <div class="post-author">{{ pub.title }} <span class="post-handle">@{{ pub.user.username }}</span></div>
+                                <div class="post-author">
+    {{ pub.title }}
+    <span class="post-handle">
+        <a href="/profile/{{ pub.user.username }}/">
+            @{{ pub.user.username }}
+        </a>
+    </span>
+</div>
                                 <div class="post-time">{{ pub.created_at|timesince }} pred</div>
                             </div>
                         </div>

@@ -10,7 +10,7 @@ from django.core.cache import cache
 
 
 
-def get_time_limit(days=1):
+def get_time_limit(days=100):
     return timezone.now() - timedelta(days=days)
 
 
@@ -35,31 +35,36 @@ def get_feed_for_user(user, page=1):
             'author_ids': list(liked_query.values_list('publication__user_id', flat=True).distinct()),
             'tag_ids': list(Publication.tags.through.objects.filter(
                 publication__likes__user=user
-            ).values_list('tag_id', flat=True).distinct())
+            ).values_list('tag_id', flat=True).distinct()),
+            'liked_post_ids': list(liked_query.values_list('publication_id', flat=True)[:1000]) 
         }
-        cache.set(cache_key, interests, timeout=300)
-    
+
+        #cache.set(cache_key, interests, timeout=300)  
+
     author_ids = interests['author_ids']
     tag_ids = interests['tag_ids']
+    liked_post_ids = interests['liked_post_ids']  
     
     # Константи для scoring
     SCORE_WEIGHTS = {
-        'likes': 0.3,
-        'comments': 0.5,
+        'likes': 0.5,
+        'comments': 1,
         'tag_match': 1.0,
         'favorite_author': 2.0,
-        'freshness': 0.5,
-        'popular': 1.5  # ✅ Новий: бонус за популярність
+        'freshness': 1.0,
+        'popular': 1.5
     }
     
-    # ✅ Отримуємо ID популярних постів
+    # Отримуємо ID популярних постів
     popular_ids = get_popular_feed().values_list('id', flat=True)[:20]
     
     candidates = Publication.objects.filter(
         Q(user_id__in=author_ids) | 
         Q(tags__id__in=tag_ids) |
-        Q(id__in=popular_ids),  # ✅ Додано популярні
+        Q(id__in=popular_ids),
         created_at__gte=time_limit
+    ).exclude(
+        id__in=liked_post_ids 
     ).annotate(
         # Підрахунки
         l_cnt=Count('likes', distinct=True),
@@ -73,7 +78,7 @@ def get_feed_for_user(user, page=1):
             output_field=FloatField()
         ),
         
-        # ✅ Чи це популярний пост?
+        # Чи це популярний пост?
         is_popular=Case(
             When(id__in=popular_ids, then=Value(1.0)),
             default=Value(0.0),
@@ -86,7 +91,7 @@ def get_feed_for_user(user, page=1):
             (F('c_cnt') * Value(SCORE_WEIGHTS['comments'])) +
             (F('t_match') * Value(SCORE_WEIGHTS['tag_match'])) +
             (F('is_fresh') * Value(SCORE_WEIGHTS['freshness'])) +
-            (F('is_popular') * Value(SCORE_WEIGHTS['popular'])) +  # ✅ Бонус за популярність
+            (F('is_popular') * Value(SCORE_WEIGHTS['popular'])) +
             Case(
                 When(user_id__in=author_ids, then=Value(SCORE_WEIGHTS['favorite_author'])),
                 default=Value(0.0),
@@ -172,7 +177,7 @@ def get_exploration_feed_for_user(user, page):
     candidates = candidates.annotate(
         score=ExpressionWrapper(
             (F('likes_cnt') * 0.2) + 
-            (F('comments_cnt') * 0.3) + 
+            (F('comments_cnt') * 0.5) + 
             (F('matching_tags_count') * 0.5) -
             Case(
                 When(user_id__in=author_ids, then=1.5),
@@ -186,40 +191,3 @@ def get_exploration_feed_for_user(user, page):
     # Сортуємо за score та свіжістю
     return candidates.order_by('-score', '-created_at')[offset:limit]
     
-
-
-
-# лише для тесту (відкладка)
-def vidlatka(authors, tags, popular_posts):
-        
-    author_posts = Publication.objects.filter(
-        user__in=authors,
-        created_at__gte = get_time_limit()
-    )
-
-    tag_posts = Publication.objects.filter(
-        tags__in=tags,
-        created_at__gte=get_time_limit()
-    )
-
-    with open("file.txt", "w", encoding="utf-8") as f:
-        f.write("=== Авторські пости ===\n")
-        for pub in author_posts:
-            f.write(f"{pub.title} | {pub.user.username} | {pub.created_at}\n")
-
-        f.write("\n=== Пости з тегами ===\n")
-        for pub in tag_posts:
-            f.write(f"{pub.title} | {pub.user.username} | {pub.created_at}\n")
-
-        f.write("\n=== Популярні пости ===\n")
-        for pub in popular_posts:
-            f.write(f"{pub.title} | {pub.user.username} | {pub.created_at} | {list(pub.tags.all())}\n")
-        
-def debug_feed(candidates, score_post):
-    with open("file.txt", "w", encoding="utf-8") as f:
-        f.write("=== SCORED FEED ===\n")
-        for post in candidates:
-            score = score_post(post)
-            tag_names = ", ".join(tag.name for tag in post.tags.all())
-            f.write(f"{post.title} | Автор: {post.user.username} | Теги: {tag_names} | Лайки: {post.likes.count()} | SCORE: {score:.3f} | {post.created_at}\n")
-
