@@ -52,48 +52,55 @@ def get_feed_for_user(user, page=1):
         'popular': 2
     }
     
-    # ✅ Отримуємо ID популярних постів (конвертуємо в список!)
+    # Отримуємо ID популярних постів
     popular_ids = list(get_popular_feed().values_list('id', flat=True)[:20])
     
+    # ✅ ВСІ АНОТАЦІЇ В ОДНОМУ БЛОЦІ!
     candidates = Publication.objects.filter(
         Q(user_id__in=author_ids) | 
         Q(tags__id__in=tag_ids) |
         Q(id__in=popular_ids),
         created_at__gte=time_limit
     ).annotate(
+        # Підрахунки
         l_cnt=Count('likes', distinct=True),
         c_cnt=Count('comments', distinct=True),
         t_match=Count('tags', filter=Q(tags__id__in=tag_ids), distinct=True),
         
+        # Свіжість
         is_fresh=Case(
             When(created_at__gte=timezone.now() - timedelta(hours=24), then=Value(1)),
             default=Value(0),
             output_field=IntegerField()
         ),
         
+        # Популярність
         is_popular=Case(
             When(id__in=popular_ids, then=Value(1)),
             default=Value(0),
             output_field=IntegerField()
-        )
-    ).annotate(
+        ),
+        
+        # Улюблений автор
+        is_fav_author=Case(
+            When(user_id__in=author_ids, then=Value(SCORE_WEIGHTS['favorite_author'])),
+            default=Value(0),
+            output_field=IntegerField()
+        ),
+        
+        # ✅ Фінальний score - ВСЕ В ОДНОМУ annotate()
         score=ExpressionWrapper(
             (F('l_cnt') * Value(SCORE_WEIGHTS['likes'])) +
             (F('c_cnt') * Value(SCORE_WEIGHTS['comments'])) +
             (F('t_match') * Value(SCORE_WEIGHTS['tag_match'])) +
             (F('is_fresh') * Value(SCORE_WEIGHTS['freshness'])) +
             (F('is_popular') * Value(SCORE_WEIGHTS['popular'])) +
-            Case(
-                When(user_id__in=author_ids, then=Value(SCORE_WEIGHTS['favorite_author'])),
-                default=Value(0),
-                output_field=IntegerField()
-            ),
+            F('is_fav_author'),
             output_field=IntegerField()
         )
     ).select_related('user').prefetch_related('tags', 'likes').order_by('-score', '-created_at')
     
     return candidates[offset:limit]
-
 def get_popular_feed(limit=10):
     return (
         Publication.objects
@@ -136,46 +143,41 @@ def get_exploration_feed_for_user(user, page):
     limit = offset + items_per_page
     time_limit = get_time_limit()
     
-    # 1. Збираємо інтереси одним махом (ID тегів та авторів)
+    # 1. Збираємо інтереси
     liked_query = Like.objects.filter(user=user)
-    
-    # ✅ Конвертуємо в списки!
     author_ids = list(liked_query.values_list('publication__user_id', flat=True).distinct())
     tag_ids = list(Publication.tags.through.objects.filter(
         publication__likes__user=user
     ).values_list('tag_id', flat=True).distinct())
-    
-    # ID постів, які вже лайкнув
     liked_post_ids = list(liked_query.values_list('publication_id', flat=True))
     
-    # 2. Формуємо запит з анотаціями (математика на стороні БД)
+    # 2. ✅ ВСІ АНОТАЦІЇ В ОДНОМУ БЛОЦІ
     candidates = Publication.objects.filter(
         created_at__gte=time_limit
     ).exclude(
-        id__in=liked_post_ids[:1000]  # ✅ Вже список, не треба list()
+        id__in=liked_post_ids[:1000]
     ).annotate(
         likes_cnt=Count('likes', distinct=True),
         comments_cnt=Count('comments', distinct=True),
-        # Рахуємо кількість спільних тегів прямо в SQL
-        matching_tags_count=Count('tags', filter=Q(tags__id__in=tag_ids), distinct=True)
-    )
-    
-    # 3. Розумне ранжування (SQL Scoring)
-    # Формула: (Лайки * 0.2) + (Коменти * 0.3) + (Теги * 0.5)
-    # Мінус бал, якщо автор вже знайомий (щоб стимулювати нових авторів)
-    candidates = candidates.annotate(
+        matching_tags_count=Count('tags', filter=Q(tags__id__in=tag_ids), distinct=True),
+        
+        # Штраф за знайомого автора
+        author_penalty=Case(
+            When(user_id__in=author_ids, then=Value(1.5)),
+            default=Value(0.0),
+            output_field=FloatField()
+        ),
+        
+        # ✅ Score в тому ж annotate()
         score=ExpressionWrapper(
             (F('likes_cnt') * 0.2) + 
             (F('comments_cnt') * 0.3) + 
             (F('matching_tags_count') * 0.5) -
-            Case(
-                When(user_id__in=author_ids, then=1.5),
-                default=0.0,
-                output_field=IntegerField()
-            ),
-            output_field=IntegerField()
+            F('author_penalty'),
+            output_field=FloatField()
         )
-    ).select_related('user').prefetch_related('tags')
+    ).select_related('user').prefetch_related('tags').order_by('-score', '-created_at')
     
-    # Сортуємо за score та свіжістю
-    return candidates.order_by('-score', '-created_at')[offset:limit]
+    return candidates[offset:limit]
+
+
