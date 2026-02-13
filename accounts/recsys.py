@@ -49,45 +49,40 @@ def get_feed_for_user(user, page=1):
         'tag_match': 1,
         'favorite_author': 2,
         'freshness': 1,
-        'popular': 2  # ✅ Новий: бонус за популярність
+        'popular': 2
     }
     
-    # ✅ Отримуємо ID популярних постів
-    popular_ids = get_popular_feed().values_list('id', flat=True)[:20]
+    # ✅ Отримуємо ID популярних постів (конвертуємо в список!)
+    popular_ids = list(get_popular_feed().values_list('id', flat=True)[:20])
     
     candidates = Publication.objects.filter(
         Q(user_id__in=author_ids) | 
         Q(tags__id__in=tag_ids) |
-        Q(id__in=popular_ids),  # ✅ Додано популярні
+        Q(id__in=popular_ids),
         created_at__gte=time_limit
     ).annotate(
-        # Підрахунки
         l_cnt=Count('likes', distinct=True),
         c_cnt=Count('comments', distinct=True),
         t_match=Count('tags', filter=Q(tags__id__in=tag_ids), distinct=True),
         
-        # Свіжість
         is_fresh=Case(
             When(created_at__gte=timezone.now() - timedelta(hours=24), then=Value(1)),
             default=Value(0),
             output_field=IntegerField()
         ),
         
-        # ✅ Чи це популярний пост?
-
         is_popular=Case(
             When(id__in=popular_ids, then=Value(1)),
             default=Value(0),
             output_field=IntegerField()
         )
     ).annotate(
-        # Фінальний score
         score=ExpressionWrapper(
             (F('l_cnt') * Value(SCORE_WEIGHTS['likes'])) +
             (F('c_cnt') * Value(SCORE_WEIGHTS['comments'])) +
             (F('t_match') * Value(SCORE_WEIGHTS['tag_match'])) +
             (F('is_fresh') * Value(SCORE_WEIGHTS['freshness'])) +
-            (F('is_popular') * Value(SCORE_WEIGHTS['popular'])) +  # ✅ Бонус за популярність
+            (F('is_popular') * Value(SCORE_WEIGHTS['popular'])) +
             Case(
                 When(user_id__in=author_ids, then=Value(SCORE_WEIGHTS['favorite_author'])),
                 default=Value(0),
@@ -98,8 +93,6 @@ def get_feed_for_user(user, page=1):
     ).select_related('user').prefetch_related('tags', 'likes').order_by('-score', '-created_at')
     
     return candidates[offset:limit]
-
-
 
 def get_popular_feed(limit=10):
     return (
@@ -141,32 +134,32 @@ def get_exploration_feed_for_user(user, page):
     items_per_page = 10
     offset = (page - 1) * items_per_page
     limit = offset + items_per_page
-
-
     time_limit = get_time_limit()
     
     # 1. Збираємо інтереси одним махом (ID тегів та авторів)
     liked_query = Like.objects.filter(user=user)
-    author_ids = liked_query.values_list('publication__user_id', flat=True).distinct()
-    tag_ids = Publication.tags.through.objects.filter(
+    
+    # ✅ Конвертуємо в списки!
+    author_ids = list(liked_query.values_list('publication__user_id', flat=True).distinct())
+    tag_ids = list(Publication.tags.through.objects.filter(
         publication__likes__user=user
-    ).values_list('tag_id', flat=True).distinct()
+    ).values_list('tag_id', flat=True).distinct())
     
     # ID постів, які вже лайкнув
-    liked_post_ids = liked_query.values_list('publication_id', flat=True)
-
+    liked_post_ids = list(liked_query.values_list('publication_id', flat=True))
+    
     # 2. Формуємо запит з анотаціями (математика на стороні БД)
     candidates = Publication.objects.filter(
         created_at__gte=time_limit
     ).exclude(
-        id__in=list(liked_post_ids)[:1000] # Exploration: не показуємо те, що вже лайкнуто
+        id__in=liked_post_ids[:1000]  # ✅ Вже список, не треба list()
     ).annotate(
         likes_cnt=Count('likes', distinct=True),
         comments_cnt=Count('comments', distinct=True),
         # Рахуємо кількість спільних тегів прямо в SQL
         matching_tags_count=Count('tags', filter=Q(tags__id__in=tag_ids), distinct=True)
     )
-
+    
     # 3. Розумне ранжування (SQL Scoring)
     # Формула: (Лайки * 0.2) + (Коменти * 0.3) + (Теги * 0.5)
     # Мінус бал, якщо автор вже знайомий (щоб стимулювати нових авторів)
@@ -183,44 +176,6 @@ def get_exploration_feed_for_user(user, page):
             output_field=IntegerField()
         )
     ).select_related('user').prefetch_related('tags')
-
+    
     # Сортуємо за score та свіжістю
     return candidates.order_by('-score', '-created_at')[offset:limit]
-    
-
-
-
-# лише для тесту (відкладка)
-def vidlatka(authors, tags, popular_posts):
-        
-    author_posts = Publication.objects.filter(
-        user__in=authors,
-        created_at__gte = get_time_limit()
-    )
-
-    tag_posts = Publication.objects.filter(
-        tags__in=tags,
-        created_at__gte=get_time_limit()
-    )
-
-    with open("file.txt", "w", encoding="utf-8") as f:
-        f.write("=== Авторські пости ===\n")
-        for pub in author_posts:
-            f.write(f"{pub.title} | {pub.user.username} | {pub.created_at}\n")
-
-        f.write("\n=== Пости з тегами ===\n")
-        for pub in tag_posts:
-            f.write(f"{pub.title} | {pub.user.username} | {pub.created_at}\n")
-
-        f.write("\n=== Популярні пости ===\n")
-        for pub in popular_posts:
-            f.write(f"{pub.title} | {pub.user.username} | {pub.created_at} | {list(pub.tags.all())}\n")
-        
-def debug_feed(candidates, score_post):
-    with open("file.txt", "w", encoding="utf-8") as f:
-        f.write("=== SCORED FEED ===\n")
-        for post in candidates:
-            score = score_post(post)
-            tag_names = ", ".join(tag.name for tag in post.tags.all())
-            f.write(f"{post.title} | Автор: {post.user.username} | Теги: {tag_names} | Лайки: {post.likes.count()} | SCORE: {score:.3f} | {post.created_at}\n")
-
