@@ -74,6 +74,7 @@ def get_feed_for_user(user, page=1):
         ),
         
         # ✅ Чи це популярний пост?
+        
         is_popular=Case(
             When(id__in=popular_ids, then=Value(1)),
             default=Value(0),
