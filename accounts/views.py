@@ -15,6 +15,7 @@ from django.views.decorators.cache import cache_page
 from django.http import HttpResponseBadRequest
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from django.db.models import Count
 
 
 
@@ -210,8 +211,6 @@ def create_comments(request, slug, parent=None):
 
     return JsonResponse({"status": "success", "message": "Spravne"})
 
-
-
 def open_publication(request, slug):
     pub = get_object_or_404(Publication, slug=slug)
     tag_info = list(tegs_feed_popular())
@@ -220,7 +219,16 @@ def open_publication(request, slug):
     return render(request, "post_users/pub.html", {"pub":pub, "tags":tags})
 
 def profile(request, username):
-    profile_user = get_object_or_404(User, username=username)
+    # Отримуємо користувача і одразу аннотовані поля
+    profile_user = (User.objects.annotate(
+        user_posts_count=Count('publications', distinct=True),
+        user_likes_count=Count('like', distinct=True),
+        user_comments_count=Count('comments', distinct=True)
+    )
+    .get(username=username)
+)
+
+    # Вибірка публікацій, лайків і коментарів (тільки для відображення)
     publications = Publication.objects.filter(user=profile_user).order_by('-id')
     likes_publication = Like.objects.filter(user=profile_user).order_by('-created_at')
     coments_user = Comments.objects.filter(user=profile_user).order_by('-created_at')
@@ -228,16 +236,16 @@ def profile(request, username):
     tag_info = list(tegs_feed_popular())
     tags = Tag.objects.filter(name__in=tag_info)
 
-    
- 
     return render(request, 'auth/profile.html', {
         'profile_user': profile_user,
         'publications': publications,
         'likes_publication': likes_publication,
-        'coments_user':coments_user,
-        'tags':tags,
+        'coments_user': coments_user,
+        'tags': tags,
+        'user_posts_count': profile_user.user_posts_count,
+        'user_likes_count': profile_user.user_likes_count,
+        'user_comments_count': profile_user.user_comments_count,
     })
-
 
 def search(request, search):
     pub_queryset = Publication.objects.order_by("created_at")

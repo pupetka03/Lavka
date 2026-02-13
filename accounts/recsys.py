@@ -44,12 +44,12 @@ def get_feed_for_user(user, page=1):
     
     # Константи для scoring
     SCORE_WEIGHTS = {
-        'likes': 0.3,
-        'comments': 0.5,
-        'tag_match': 1.0,
-        'favorite_author': 2.0,
-        'freshness': 0.5,
-        'popular': 1.5  # ✅ Новий: бонус за популярність
+        'likes': 1,
+        'comments': 2,
+        'tag_match': 1,
+        'favorite_author': 2,
+        'freshness': 1,
+        'popular': 2  # ✅ Новий: бонус за популярність
     }
     
     # ✅ Отримуємо ID популярних постів
@@ -68,15 +68,15 @@ def get_feed_for_user(user, page=1):
         
         # Свіжість
         is_fresh=Case(
-            When(created_at__gte=timezone.now() - timedelta(hours=24), then=Value(1.0)),
-            default=Value(0.0),
+            When(created_at__gte=timezone.now() - timedelta(hours=24), then=Value(1)),
+            default=Value(0),
             output_field=FloatField()
         ),
         
         # ✅ Чи це популярний пост?
         is_popular=Case(
-            When(id__in=popular_ids, then=Value(1.0)),
-            default=Value(0.0),
+            When(id__in=popular_ids, then=Value(1)),
+            default=Value(0),
             output_field=FloatField()
         )
     ).annotate(
@@ -89,7 +89,7 @@ def get_feed_for_user(user, page=1):
             (F('is_popular') * Value(SCORE_WEIGHTS['popular'])) +  # ✅ Бонус за популярність
             Case(
                 When(user_id__in=author_ids, then=Value(SCORE_WEIGHTS['favorite_author'])),
-                default=Value(0.0),
+                default=Value(0),
                 output_field=FloatField()
             ),
             output_field=FloatField()
