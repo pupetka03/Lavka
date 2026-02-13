@@ -14,7 +14,7 @@ def get_time_limit(days=3):
     return timezone.now() - timedelta(days=days)
 
 
-from django.db.models import Value, FloatField
+from django.db.models import Value, FloatField, IntegerField
 from django.db.models.functions import Now
 from django.utils import timezone
 
@@ -70,15 +70,15 @@ def get_feed_for_user(user, page=1):
         is_fresh=Case(
             When(created_at__gte=timezone.now() - timedelta(hours=24), then=Value(1)),
             default=Value(0),
-            output_field=FloatField()
+            output_field=IntegerField()
         ),
         
         # ✅ Чи це популярний пост?
-        
+
         is_popular=Case(
             When(id__in=popular_ids, then=Value(1)),
             default=Value(0),
-            output_field=FloatField()
+            output_field=IntegerField()
         )
     ).annotate(
         # Фінальний score
@@ -91,9 +91,9 @@ def get_feed_for_user(user, page=1):
             Case(
                 When(user_id__in=author_ids, then=Value(SCORE_WEIGHTS['favorite_author'])),
                 default=Value(0),
-                output_field=FloatField()
+                output_field=IntegerField()
             ),
-            output_field=FloatField()
+            output_field=IntegerField()
         )
     ).select_related('user').prefetch_related('tags', 'likes').order_by('-score', '-created_at')
     
@@ -132,7 +132,7 @@ def tegs_feed_popular(max_tags=3):
     return [tag for tag, count in sorted_tags[:max_tags]]
 
 
-from django.db.models import Case, When, F, FloatField, ExpressionWrapper, Count, Q
+from django.db.models import Case, When, F, FloatField, ExpressionWrapper, Count, Q, IntegerField
 from django.db.models.functions import Now
 
 def get_exploration_feed_for_user(user, page):
@@ -178,9 +178,9 @@ def get_exploration_feed_for_user(user, page):
             Case(
                 When(user_id__in=author_ids, then=1.5),
                 default=0.0,
-                output_field=FloatField()
+                output_field=IntegerField()
             ),
-            output_field=FloatField()
+            output_field=IntegerField()
         )
     ).select_related('user').prefetch_related('tags')
 
